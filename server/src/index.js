@@ -7,6 +7,11 @@ import RoomManager from './RoomManager.js';
 const app = express();
 app.use(cors());
 
+// Health check route for deployment platforms (like Render)
+app.get('/', (req, res) => {
+    res.status(200).send('Promate Socket.IO Server is running');
+});
+
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
     cors: {
