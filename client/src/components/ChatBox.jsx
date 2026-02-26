@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { MessageSquare, Send, X } from 'lucide-react';
 import { useSocket } from '../context/SocketContext';
 
-const ChatBox = ({ roomId, initialMessages = [] }) => {
+const ChatBox = ({ roomId, initialMessages = [], username = '' }) => {
     const { socket } = useSocket();
     const [isOpen, setIsOpen] = useState(false);
     const [messages, setMessages] = useState(initialMessages);
@@ -48,7 +48,7 @@ const ChatBox = ({ roomId, initialMessages = [] }) => {
         const text = newMessage.trim();
         if (!text || !socket) return;
 
-        const sender = `User-${socket.id.substring(0, 4)}`;
+        const sender = username || `User-${socket.id.substring(0, 4)}`;
 
         // Optimistic update: show own message immediately
         const optimisticMsg = {
@@ -97,7 +97,8 @@ const ChatBox = ({ roomId, initialMessages = [] }) => {
                                 </div>
                             ) : (
                                 messages.map((msg, idx) => {
-                                    const isMe = socket && msg.sender.includes(socket.id.substring(0, 4));
+                                    const myName = username || (socket && `User-${socket.id.substring(0, 4)}`);
+                                    const isMe = msg.sender === myName;
                                     return (
                                         <div key={msg.id || idx} className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
                                             <span className="text-[10px] text-white/30 mb-1 tracking-wider uppercase">

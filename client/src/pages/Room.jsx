@@ -30,6 +30,9 @@ const Room = () => {
     const [copied, setCopied] = useState(false);
     const [bgSelectionOpen, setBgSelectionOpen] = useState(false);
     const [customGif, setCustomGif] = useState(null);
+    const [username, setUsername] = useState('');
+    const [usernameInput, setUsernameInput] = useState('');
+    const [showUsernameModal, setShowUsernameModal] = useState(false);
 
     // Sync Timer Display
     useEffect(() => {
@@ -155,6 +158,20 @@ const Room = () => {
 
     if (!roomState) {
         return <div className="min-h-screen bg-black text-white flex items-center justify-center">Syncing Session...</div>;
+    }
+
+    // Show username prompt after room loads (if not set)
+    const handleSetUsername = (e) => {
+        e.preventDefault();
+        const name = usernameInput.trim();
+        if (!name) return;
+        setUsername(name);
+        setShowUsernameModal(false);
+    };
+
+    // Trigger modal once room is ready and username isn't set
+    if (!username && !showUsernameModal) {
+        setTimeout(() => setShowUsernameModal(true), 0);
     }
 
     const currentBg = roomState.settings.background;
@@ -298,7 +315,7 @@ const Room = () => {
                 {/* Floating Widgets Wrapper */}
                 <div className="relative w-full z-40 mt-8 mb-4 px-4 flex flex-col sm:flex-row items-center justify-center sm:justify-between gap-4 md:fixed md:bottom-6 md:left-6 md:right-10 md:mt-0 md:mb-0 md:px-0 pointer-events-none">
                     <div className="pointer-events-auto w-full sm:w-auto flex justify-center sm:justify-start">
-                        <ChatBox roomId={roomId} initialMessages={initialMessages} />
+                        <ChatBox roomId={roomId} initialMessages={initialMessages} username={username} />
                     </div>
                     <div className="pointer-events-auto w-full sm:w-auto flex justify-center sm:justify-end">
                         <TaskManager roomId={roomId} tasks={tasks} />
@@ -306,6 +323,51 @@ const Room = () => {
                 </div>
 
             </div>
+
+            {/* Username Prompt Modal */}
+            <AnimatePresence>
+                {showUsernameModal && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-sm px-6"
+                    >
+                        <motion.div
+                            initial={{ scale: 0.9, y: 20 }}
+                            animate={{ scale: 1, y: 0 }}
+                            exit={{ scale: 0.9, y: 20 }}
+                            className="glass-panel w-full max-w-sm p-8 rounded-3xl shadow-2xl border border-white/10 bg-[#09090b]/95 space-y-6"
+                        >
+                            <div className="space-y-2 text-center">
+                                <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center mx-auto mb-4">
+                                    <span className="text-2xl">👤</span>
+                                </div>
+                                <h2 className="text-xl font-bold text-white">What's your name?</h2>
+                                <p className="text-white/50 text-sm">Others in this session will see this in chat.</p>
+                            </div>
+                            <form onSubmit={handleSetUsername} className="space-y-4">
+                                <input
+                                    type="text"
+                                    value={usernameInput}
+                                    onChange={(e) => setUsernameInput(e.target.value)}
+                                    placeholder="Enter your display name..."
+                                    autoFocus
+                                    maxLength={20}
+                                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-base text-white placeholder:text-white/30 focus:outline-none focus:border-emerald-500/50 transition-all"
+                                />
+                                <button
+                                    type="submit"
+                                    disabled={!usernameInput.trim()}
+                                    className="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 disabled:cursor-not-allowed text-white font-semibold transition-colors"
+                                >
+                                    Join Session
+                                </button>
+                            </form>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </PageTransition>
     );
 };
