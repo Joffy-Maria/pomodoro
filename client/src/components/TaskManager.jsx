@@ -29,17 +29,17 @@ const TaskManager = ({ roomId, tasks }) => {
     const completedCount = tasks.filter(t => t.completed).length;
 
     return (
-        <div className="fixed bottom-6 right-6 z-40 flex flex-col items-end">
+        <div className="relative md:fixed md:bottom-6 md:right-10 z-40 flex flex-col items-center sm:items-end">
 
             {/* The Task Widget Body */}
             <AnimatePresence>
                 {isOpen && (
                     <motion.div
-                        initial={{ opacity: 0, y: 20, scale: 0.9 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: 20, scale: 0.9 }}
+                        initial={{ opacity: 0, scale: 0.9, transformOrigin: 'bottom' }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.9 }}
                         transition={{ type: "spring", stiffness: 300, damping: 25 }}
-                        className="glass-panel w-[calc(100vw-3rem)] sm:w-80 max-h-[60vh] flex flex-col rounded-3xl mb-4 overflow-hidden border border-white/20 shadow-2xl backdrop-blur-xl bg-black/60"
+                        className="absolute bottom-[calc(100%+1rem)] left-1/2 -translate-x-1/2 sm:translate-x-0 sm:left-auto sm:right-0 md:relative md:bottom-auto glass-panel w-[calc(100vw-3rem)] sm:w-80 max-h-[60vh] flex flex-col rounded-3xl md:mb-4 overflow-hidden border border-white/20 shadow-2xl backdrop-blur-xl bg-black/60"
                     >
                         {/* Header */}
                         <div className="p-4 border-b border-white/10 flex justify-between items-center bg-white/5">

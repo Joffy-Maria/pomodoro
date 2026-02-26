@@ -6,6 +6,7 @@ import { useSocket } from '../context/SocketContext';
 import PageTransition from '../components/ui/PageTransition';
 import InteractiveButton from '../components/ui/InteractiveButton';
 import TaskManager from '../components/TaskManager';
+import ChatBox from '../components/ChatBox';
 
 const THEMES = {
     BloomingGarden: 'https://codepen.io/animmaster_studio/embed/jEqpopr?default-tab=result&theme-id=dark',
@@ -23,6 +24,7 @@ const Room = () => {
     const [timerState, setTimerState] = useState(null);
     const [displayTime, setDisplayTime] = useState('25:00');
     const [tasks, setTasks] = useState([]);
+    const [messages, setMessages] = useState([]);
 
     // UI States
     const [copied, setCopied] = useState(false);
@@ -86,6 +88,7 @@ const Room = () => {
                     setRoomState(response.roomState);
                     setTimerState(response.roomState.timer);
                     setTasks(response.roomState.tasks || []);
+                    setMessages(response.roomState.chat || []);
                 }
             } else {
                 navigate('/home'); // Room doesn't exist
@@ -102,15 +105,20 @@ const Room = () => {
         const handleTasksSync = (updatedTasks) => {
             setTasks(updatedTasks);
         };
+        const handleChatSync = (updatedChat) => {
+            setMessages(updatedChat);
+        };
 
         socket.on('timer_sync', handleTimerSync);
         socket.on('background_changed', handleBackgroundChanged);
         socket.on('tasks_sync', handleTasksSync);
+        socket.on('chat_sync', handleChatSync);
 
         return () => {
             socket.off('timer_sync', handleTimerSync);
             socket.off('background_changed', handleBackgroundChanged);
             socket.off('tasks_sync', handleTasksSync);
+            socket.off('chat_sync', handleChatSync);
         };
     }, [roomId, socket, isConnected, navigate]);
 
@@ -162,7 +170,7 @@ const Room = () => {
 
     return (
         <PageTransition transitionType="morph">
-            <div className="relative min-h-screen w-full overflow-hidden bg-black text-white">
+            <div className="relative min-h-[100dvh] w-full overflow-x-hidden overflow-y-auto bg-black text-white flex flex-col pt-24 pb-32 md:py-0 md:block">
 
                 {/* Background rendering (Custom string URL, local upload, or iFrame) */}
                 <div className="absolute inset-0 z-0 overflow-hidden bg-black">
@@ -234,8 +242,8 @@ const Room = () => {
                 </div>
 
                 {/* Timer Center Piece */}
-                <div className="absolute inset-0 flex flex-col items-center justify-center z-10 pointer-events-none px-4">
-                    <div className="pointer-events-auto glass-panel p-6 md:p-12 rounded-[2rem] md:rounded-[3rem] w-full max-w-[90vw] md:max-w-max flex flex-col items-center gap-6 md:gap-10 border border-white/10 shadow-[0_0_50px_rgba(0,0,0,0.5)] backdrop-blur-xl">
+                <div className="relative md:absolute md:inset-0 flex flex-col items-center justify-center z-10 pointer-events-none px-4 flex-1">
+                    <div className="pointer-events-auto glass-panel p-6 md:p-12 rounded-[2rem] md:rounded-[3rem] w-full max-w-md md:max-w-max flex flex-col items-center gap-6 md:gap-10 border border-white/10 shadow-[0_0_50px_rgba(0,0,0,0.5)] backdrop-blur-xl mx-auto mt-4 md:mt-0">
 
                         {/* Mode Selector */}
                         <div className="flex gap-2 md:gap-4 p-1.5 md:p-2 bg-black/40 rounded-xl md:rounded-2xl w-full md:w-auto">
@@ -255,7 +263,7 @@ const Room = () => {
 
                         {/* Clock Display */}
                         <motion.div
-                            className="text-[22vw] md:text-8xl lg:text-9xl font-extrabold tracking-tighter tabular-nums drop-shadow-[0_0_40px_currentColor] leading-none my-4 md:my-0"
+                            className="text-[25vw] sm:text-[22vw] md:text-8xl lg:text-9xl font-extrabold tracking-tighter tabular-nums drop-shadow-[0_0_40px_currentColor] leading-none my-2 md:my-0"
                             animate={{
                                 color: timerState?.mode === 'focus' ? '#e879f9' : '#34d399',
                                 scale: timerState?.status === 'running' ? [1, 1.02, 1] : 1
@@ -285,13 +293,20 @@ const Room = () => {
                     </div>
 
                     {/* Participants count indicator */}
-                    <div className="mt-8 px-6 py-2 glass-panel rounded-full text-sm text-white/50 tracking-widest font-medium">
+                    <div className="mt-8 px-6 py-2 glass-panel rounded-full text-sm text-white/50 tracking-widest font-medium mx-auto">
                         {roomState.participants?.length || 1} Syncing Participant(s)
                     </div>
                 </div>
 
-                {/* Floating Task Manager Widget */}
-                <TaskManager roomId={roomId} tasks={tasks} />
+                {/* Floating Widgets Wrapper */}
+                <div className="relative w-full z-40 mt-8 mb-4 px-4 flex flex-col sm:flex-row items-center justify-center sm:justify-between gap-4 md:fixed md:bottom-6 md:left-6 md:right-10 md:mt-0 md:mb-0 md:px-0 pointer-events-none">
+                    <div className="pointer-events-auto w-full sm:w-auto flex justify-center sm:justify-start">
+                        <ChatBox roomId={roomId} messages={messages} />
+                    </div>
+                    <div className="pointer-events-auto w-full sm:w-auto flex justify-center sm:justify-end">
+                        <TaskManager roomId={roomId} tasks={tasks} />
+                    </div>
+                </div>
 
             </div>
         </PageTransition>

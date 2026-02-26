@@ -196,6 +196,17 @@ io.on('connection', (socket) => {
             }
         }
     });
+
+    // Chat management
+    socket.on('send_message', ({ roomId, sender, text }) => {
+        const room = RoomManager.getRoom(roomId);
+        if (room && room.participants.includes(socket.id)) {
+            const updatedChat = RoomManager.addChatMessage(roomId, sender, text);
+            if (updatedChat) {
+                io.to(roomId).emit('chat_sync', updatedChat);
+            }
+        }
+    });
 });
 
 const PORT = process.env.PORT || 3001;

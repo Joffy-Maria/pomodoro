@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Users, Focus, ListTodo, Palette } from 'lucide-react';
+import { X, Users, Focus, ListTodo, Palette, MessageSquare } from 'lucide-react';
 import PageTransition from './ui/PageTransition';
 
 export default function UserManual({ isOpen, onClose }) {
@@ -84,6 +84,17 @@ export default function UserManual({ isOpen, onClose }) {
                                     <h3 className="text-white font-semibold">Shared Task List</h3>
                                     <p className="text-white/50 text-sm leading-relaxed">
                                         Use the floating button in the room to track team goals. Adding, toggling, or removing a task updates for everyone instantly.
+                                    </p>
+                                </div>
+
+                                {/* Feature 5 */}
+                                <div className="space-y-3 p-5 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors md:col-span-2 lg:col-span-1">
+                                    <div className="w-10 h-10 rounded-xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center">
+                                        <MessageSquare size={20} />
+                                    </div>
+                                    <h3 className="text-white font-semibold">Real-Time Chat</h3>
+                                    <p className="text-white/50 text-sm leading-relaxed">
+                                        Communicate with everyone in the room via the bottom-left chat panel. Send quick messages without leaving your state of flow.
                                     </p>
                                 </div>
 

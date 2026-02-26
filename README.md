@@ -11,6 +11,7 @@ At its core, Promate removes the friction of typical productivity apps by requir
 - **Master Timer Control:** The room host has authoritative control over the Pomodoro timer (Start, Pause, Reset, Focus/Break modes). The countdown is deterministic based on server time to prevent client-side drift.
 - **Immersive 3D Environments:** Users can customize their focus spaces. Built-in options include interactive WebGL particles, CSS 3D landscapes (Blooming Garden, Climbing Cube, Saturn Hula, Lighthouse Ocean), or the ability to upload custom direct GIF/Image URLs.
 - **Real-time Task Management:** A built-in, floating Glassmorphism Task Manager allows participants to track goals together. Adding, ticking off, or deleting a task instantly updates the list for everyone in the room.
+- **Synchronized Chat:** Communicate with anyone in the ephemeral room using the bottom-left chat panel, which leverages Socket.io for millisecond delivery.
 - **Microinteractions & Polish:** Framer Motion-powered page morphs, `@react-three/drei` Sparkle particle emissions on hover states, and layered backdrop blurs make the experience feel highly premium and tactile.
 
 

@@ -24,7 +24,8 @@ class RoomManager {
         focusDuration: 25 * 60,
         breakDuration: 5 * 60,
         background: 'BloomingGarden' // default background
-      }
+      },
+      chat: []
     });
     return roomId;
   }
@@ -150,6 +151,28 @@ class RoomManager {
 
     room.tasks = room.tasks.filter(t => t.id !== taskId);
     return room.tasks;
+  }
+
+  // --- CHAT SYSTEM ---
+  addChatMessage(roomId, sender, text) {
+    const room = this.rooms.get(roomId);
+    if (!room) return null;
+
+    const message = {
+      id: Date.now().toString() + Math.random().toString(36).substr(2, 5),
+      sender,
+      text,
+      timestamp: Date.now()
+    };
+
+    room.chat.push(message);
+
+    // Optional: limit history to 100 messages to save memory
+    if (room.chat.length > 100) {
+      room.chat.shift();
+    }
+
+    return room.chat;
   }
 }
 
