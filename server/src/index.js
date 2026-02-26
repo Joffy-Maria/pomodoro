@@ -92,10 +92,15 @@ io.on('connection', (socket) => {
         }
     });
 
-    // Check room validity without joining (prevents duplicate join bugs)
+    // Check room validity - also re-joins socket.io room to handle reconnects
     socket.on('check_room', ({ roomId }, callback) => {
         const room = RoomManager.getRoom(roomId);
         if (room) {
+            // Always re-join the socket.io room in case of reconnect/refresh
+            // This ensures chat_sync and other broadcasts reach this socket
+            if (room.participants.includes(socket.id)) {
+                socket.join(roomId);
+            }
             if (typeof callback === 'function') callback({ success: true, roomState: room });
         } else {
             if (typeof callback === 'function') callback({ success: false, message: 'Room not found' });
