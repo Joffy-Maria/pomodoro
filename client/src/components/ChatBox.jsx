@@ -63,7 +63,7 @@ const ChatBox = ({ roomId, messages = [] }) => {
                                     return (
                                         <div key={msg.id || idx} className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
                                             <span className="text-[10px] text-white/30 mb-1 ml-1 tracking-wider uppercase">{isMe ? 'You' : msg.sender}</span>
-                                            <div className={`px-4 py-2 rounded-2xl max-w-[85%] text-sm ${isMe ? 'bg-emerald-600/80 text-white rounded-br-sm' : 'bg-white/10 text-white/90 rounded-bl-sm'}`}>
+                                            <div className={`px-4 py-2 rounded-2xl max-w-[85%] text-sm break-words whitespace-pre-wrap ${isMe ? 'bg-emerald-600/80 text-white rounded-br-sm' : 'bg-white/10 text-white/90 rounded-bl-sm'}`}>
                                                 {msg.text}
                                             </div>
                                         </div>
@@ -81,7 +81,7 @@ const ChatBox = ({ roomId, messages = [] }) => {
                                     value={newMessage}
                                     onChange={(e) => setNewMessage(e.target.value)}
                                     placeholder="Type a message..."
-                                    className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-4 pr-12 text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-emerald-500/50 focus:bg-white/10 transition-all"
+                                    className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-4 pr-12 text-base md:text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-emerald-500/50 focus:bg-white/10 transition-all"
                                 />
                                 <button
                                     type="submit"

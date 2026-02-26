@@ -195,7 +195,7 @@ const Room = () => {
                 <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-5 pointer-events-none mix-blend-overlay"></div>
 
                 {/* Top Bar */}
-                <div className="absolute top-0 left-0 right-0 p-4 md:p-6 flex justify-between items-center z-10 glass-panel rounded-b-2xl md:rounded-b-3xl border-t-0 shadow-lg">
+                <div className="absolute top-0 left-0 right-0 p-4 md:p-6 flex justify-between items-center z-50 glass-panel rounded-b-2xl md:rounded-b-3xl border-t-0 shadow-lg">
                     <div className="flex flex-col">
                         <span className="text-xs md:text-sm text-white/50 tracking-widest uppercase">Session ID</span>
                         <div className="flex items-center gap-2">

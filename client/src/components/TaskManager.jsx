@@ -102,7 +102,7 @@ const TaskManager = ({ roomId, tasks }) => {
                                     value={newTaskText}
                                     onChange={(e) => setNewTaskText(e.target.value)}
                                     placeholder="Add a new task..."
-                                    className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-4 pr-12 text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-purple-500/50 focus:bg-white/10 transition-all"
+                                    className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-4 pr-12 text-base md:text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-purple-500/50 focus:bg-white/10 transition-all"
                                 />
                                 <button
                                     type="submit"

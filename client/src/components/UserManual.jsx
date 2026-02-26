@@ -16,8 +16,7 @@ export default function UserManual({ isOpen, onClose }) {
                     <motion.div
                         initial={{ scale: 0.9, y: 20 }}
                         animate={{ scale: 1, y: 0 }}
-                        exit={{ scale: 0.9, y: 20 }}
-                        className="glass-panel w-full max-w-2xl p-8 md:p-12 rounded-[2rem] shadow-2xl bg-[#09090b]/90 border border-white/10 relative overflow-hidden"
+                        className="glass-panel w-full max-w-2xl p-6 md:p-12 max-h-[85vh] overflow-y-auto overflow-x-hidden rounded-[2rem] shadow-2xl bg-[#09090b]/90 border border-white/10 relative"
                     >
                         {/* Background Decoration */}
                         <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
