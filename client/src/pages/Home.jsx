@@ -89,7 +89,7 @@ const Home = () => {
                         <motion.h1
                             initial={{ opacity: 0, y: -20 }}
                             animate={{ opacity: 1, y: 0 }}
-                            className="text-5xl font-extrabold tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-pink-400 via-purple-400 to-indigo-400 drop-shadow-[0_0_15px_rgba(236,72,153,0.5)]"
+                            className="text-4xl md:text-5xl font-extrabold tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-pink-400 via-purple-400 to-indigo-400 drop-shadow-[0_0_15px_rgba(236,72,153,0.5)]"
                         >
                             Ready to Focus?
                         </motion.h1>
@@ -102,16 +102,16 @@ const Home = () => {
                     <div className="w-full relative mt-4">
                         {error && <p className="text-rose-400 text-sm text-center absolute -top-8 left-0 right-0">{error}</p>}
 
-                        <form onSubmit={handleJoinRoom} className="flex gap-3">
+                        <form onSubmit={handleJoinRoom} className="flex flex-col sm:flex-row gap-3">
                             <input
                                 type="text"
                                 value={roomIdInput}
                                 onChange={(e) => setRoomIdInput(e.target.value.toUpperCase())}
                                 placeholder="Or Join By Room Code"
-                                className="flex-1 bg-black/40 border-2 border-white/5 rounded-2xl px-6 py-4 text-white placeholder:text-white/30 focus:outline-none focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/50 transition-all uppercase tracking-widest shadow-inner text-sm backdrop-blur-md"
+                                className="flex-1 w-full bg-black/40 border-2 border-white/5 rounded-2xl px-6 py-4 text-white placeholder:text-white/30 focus:outline-none focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/50 transition-all uppercase tracking-widest shadow-inner text-sm backdrop-blur-md"
                                 maxLength={6}
                             />
-                            <InteractiveButton variant="primary" onClick={handleJoinRoom} className="px-8 !rounded-2xl">
+                            <InteractiveButton variant="primary" onClick={handleJoinRoom} className="w-full sm:w-auto px-8 !rounded-2xl">
                                 Join
                             </InteractiveButton>
                         </form>
@@ -134,7 +134,7 @@ const Home = () => {
                                 initial={{ scale: 0.9, y: 20 }}
                                 animate={{ scale: 1, y: 0 }}
                                 exit={{ scale: 0.9, y: 20 }}
-                                className="glass-panel w-full max-w-md p-8 rounded-3xl shadow-2xl space-y-8 bg-[#09090b]/80 border border-white/10"
+                                className="glass-panel w-[95%] max-w-md p-6 md:p-8 rounded-3xl shadow-2xl space-y-6 md:space-y-8 bg-[#09090b]/80 border border-white/10"
                             >
                                 <div className="space-y-2">
                                     <h2 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-400">Configure Session</h2>

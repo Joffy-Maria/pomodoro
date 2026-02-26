@@ -187,13 +187,13 @@ const Room = () => {
                 <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-5 pointer-events-none mix-blend-overlay"></div>
 
                 {/* Top Bar */}
-                <div className="absolute top-0 left-0 right-0 p-6 flex justify-between items-center z-10 glass-panel rounded-b-3xl border-t-0 shadow-lg">
+                <div className="absolute top-0 left-0 right-0 p-4 md:p-6 flex justify-between items-center z-10 glass-panel rounded-b-2xl md:rounded-b-3xl border-t-0 shadow-lg">
                     <div className="flex flex-col">
-                        <span className="text-sm text-white/50 tracking-widest uppercase">Session ID</span>
+                        <span className="text-xs md:text-sm text-white/50 tracking-widest uppercase">Session ID</span>
                         <div className="flex items-center gap-2">
-                            <span className="text-xl font-bold tracking-widest text-purple-300">{roomId}</span>
-                            <button onClick={copyLink} className="p-2 hover:bg-white/10 rounded-lg transition-colors text-white/70 hover:text-white">
-                                {copied ? <Check size={16} className="text-green-400" /> : <Copy size={16} />}
+                            <span className="text-lg md:text-xl font-bold tracking-widest text-purple-300">{roomId}</span>
+                            <button onClick={copyLink} className="p-1.5 md:p-2 hover:bg-white/10 rounded-lg transition-colors text-white/70 hover:text-white">
+                                {copied ? <Check size={14} className="text-green-400" /> : <Copy size={14} className="md:w-4 md:h-4" />}
                             </button>
                         </div>
                     </div>
@@ -234,20 +234,20 @@ const Room = () => {
                 </div>
 
                 {/* Timer Center Piece */}
-                <div className="absolute inset-0 flex flex-col items-center justify-center z-10 pointer-events-none">
-                    <div className="pointer-events-auto glass-panel p-12 rounded-[3rem] flex flex-col items-center gap-10 border border-white/10 shadow-[0_0_50px_rgba(0,0,0,0.5)] backdrop-blur-xl">
+                <div className="absolute inset-0 flex flex-col items-center justify-center z-10 pointer-events-none px-4">
+                    <div className="pointer-events-auto glass-panel p-6 md:p-12 rounded-[2rem] md:rounded-[3rem] w-full max-w-[90vw] md:max-w-max flex flex-col items-center gap-6 md:gap-10 border border-white/10 shadow-[0_0_50px_rgba(0,0,0,0.5)] backdrop-blur-xl">
 
                         {/* Mode Selector */}
-                        <div className="flex gap-4 p-2 bg-black/40 rounded-2xl">
+                        <div className="flex gap-2 md:gap-4 p-1.5 md:p-2 bg-black/40 rounded-xl md:rounded-2xl w-full md:w-auto">
                             <button
                                 onClick={() => handleSwitchMode('focus')}
-                                className={`px-6 py-2 rounded-xl text-sm font-medium transition-all ${timerState?.mode === 'focus' ? 'bg-purple-600 text-white shadow-lg shadow-purple-500/30' : 'text-white/50 hover:text-white'}`}
+                                className={`flex-1 md:flex-none px-4 md:px-6 py-2 rounded-lg md:rounded-xl text-xs md:text-sm font-medium transition-all ${timerState?.mode === 'focus' ? 'bg-purple-600 text-white shadow-lg shadow-purple-500/30' : 'text-white/50 hover:text-white'}`}
                             >
                                 Focus
                             </button>
                             <button
                                 onClick={() => handleSwitchMode('break')}
-                                className={`px-6 py-2 rounded-xl text-sm font-medium transition-all ${timerState?.mode === 'break' ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-500/30' : 'text-white/50 hover:text-white'}`}
+                                className={`flex-1 md:flex-none px-4 md:px-6 py-2 rounded-lg md:rounded-xl text-xs md:text-sm font-medium transition-all ${timerState?.mode === 'break' ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-500/30' : 'text-white/50 hover:text-white'}`}
                             >
                                 Break
                             </button>
@@ -255,7 +255,7 @@ const Room = () => {
 
                         {/* Clock Display */}
                         <motion.div
-                            className="text-8xl md:text-9xl font-extrabold tracking-tighter tabular-nums drop-shadow-[0_0_40px_currentColor]"
+                            className="text-[22vw] md:text-8xl lg:text-9xl font-extrabold tracking-tighter tabular-nums drop-shadow-[0_0_40px_currentColor] leading-none my-4 md:my-0"
                             animate={{
                                 color: timerState?.mode === 'focus' ? '#e879f9' : '#34d399',
                                 scale: timerState?.status === 'running' ? [1, 1.02, 1] : 1
@@ -266,19 +266,19 @@ const Room = () => {
                         </motion.div>
 
                         {/* Controls */}
-                        <div className="flex gap-6">
+                        <div className="flex gap-4 md:gap-6 items-center">
                             {timerState?.status !== 'running' ? (
-                                <InteractiveButton variant="primary" onClick={() => handleCommand('start')} className="w-20 h-20 !rounded-full p-0 flex items-center justify-center bg-white text-black hover:bg-slate-200">
-                                    <Play size={32} className="ml-2" />
+                                <InteractiveButton variant="primary" onClick={() => handleCommand('start')} className="w-16 h-16 md:w-20 md:h-20 !rounded-full p-0 flex items-center justify-center bg-white text-black hover:bg-slate-200">
+                                    <Play size={24} className="ml-1 md:w-8 md:h-8 md:ml-2" />
                                 </InteractiveButton>
                             ) : (
-                                <InteractiveButton variant="secondary" onClick={() => handleCommand('pause')} className="w-20 h-20 !rounded-full p-0 flex items-center justify-center border-2 border-white/30 text-white hover:bg-white/10">
-                                    <Pause size={32} />
+                                <InteractiveButton variant="secondary" onClick={() => handleCommand('pause')} className="w-16 h-16 md:w-20 md:h-20 !rounded-full p-0 flex items-center justify-center border-2 border-white/30 text-white hover:bg-white/10">
+                                    <Pause size={24} className="md:w-8 md:h-8" />
                                 </InteractiveButton>
                             )}
 
-                            <InteractiveButton variant="ghost" onClick={() => handleCommand('reset')} className="w-16 h-16 !rounded-full p-0 flex items-center justify-center mt-2 group">
-                                <RotateCcw size={24} className="group-hover:-rotate-90 transition-transform duration-500" />
+                            <InteractiveButton variant="ghost" onClick={() => handleCommand('reset')} className="w-14 h-14 md:w-16 md:h-16 !rounded-full p-0 flex items-center justify-center md:mt-2 group">
+                                <RotateCcw size={20} className="md:w-6 md:h-6 group-hover:-rotate-90 transition-transform duration-500" />
                             </InteractiveButton>
                         </div>
 

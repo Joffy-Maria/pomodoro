@@ -39,7 +39,7 @@ const TaskManager = ({ roomId, tasks }) => {
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: 20, scale: 0.9 }}
                         transition={{ type: "spring", stiffness: 300, damping: 25 }}
-                        className="glass-panel w-80 max-h-[60vh] flex flex-col rounded-3xl mb-4 overflow-hidden border border-white/20 shadow-2xl backdrop-blur-xl bg-black/60"
+                        className="glass-panel w-[calc(100vw-3rem)] sm:w-80 max-h-[60vh] flex flex-col rounded-3xl mb-4 overflow-hidden border border-white/20 shadow-2xl backdrop-blur-xl bg-black/60"
                     >
                         {/* Header */}
                         <div className="p-4 border-b border-white/10 flex justify-between items-center bg-white/5">

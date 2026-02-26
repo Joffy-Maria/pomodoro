@@ -45,15 +45,15 @@ export default function FeatureCarousel({ onSelectFeature }) {
     };
 
     return (
-        <div className="relative w-full max-w-4xl h-[450px] flex flex-col items-center justify-center perspective-[1500px]">
+        <div className="relative w-full max-w-4xl h-[350px] md:h-[450px] flex flex-col items-center justify-center perspective-[1000px] md:perspective-[1500px]">
 
             {/* 3D Carousel Stage */}
-            <div className="relative w-[700px] h-[400px] transform-style-3d flex items-center justify-center">
+            <div className="relative w-full max-w-[700px] h-[300px] md:h-[400px] transform-style-3d flex items-center justify-center">
 
                 {/* Navigation Arrows */}
                 <button
                     onClick={handlePrev}
-                    className="absolute -left-28 z-30 p-6 rounded-full bg-white/5 hover:bg-white/20 backdrop-blur border border-white/10 transition-all text-white/50 hover:text-white"
+                    className="absolute -left-12 md:-left-28 z-30 p-3 md:p-6 rounded-full bg-white/5 hover:bg-white/20 backdrop-blur border border-white/10 transition-all text-white/50 hover:text-white"
                 >
                     <ChevronLeft size={32} />
                 </button>
@@ -81,9 +81,9 @@ export default function FeatureCarousel({ onSelectFeature }) {
                                     zIndex: isActive ? 10 : 0
                                 }}
                                 transition={{ duration: 0.6, ease: [0.32, 0.72, 0, 1] }}
-                                className={`absolute inset-0 cursor-pointer rounded-[2rem] p-12 flex flex-col justify-between 
+                                className={`absolute inset-0 cursor-pointer rounded-[2rem] p-6 md:p-12 flex flex-col justify-between 
                             bg-gradient-to-br ${card.color} border border-b-0 backdrop-blur-xl 
-                            shadow-3xl overflow-hidden hover:shadow-purple-500/50 transition-shadow duration-500 mx-auto w-[600px] h-[350px]`}
+                            shadow-3xl overflow-hidden hover:shadow-purple-500/50 transition-shadow duration-500 mx-auto w-[85%] md:w-[600px] h-[280px] md:h-[350px]`}
                                 style={{
                                     transformStyle: 'preserve-3d',
                                     borderTopColor: 'rgba(255,255,255,0.2)',
@@ -95,12 +95,12 @@ export default function FeatureCarousel({ onSelectFeature }) {
                                 <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 mix-blend-overlay pointer-events-none"></div>
 
                                 <div className="relative z-10 text-left pointer-events-none">
-                                    <h3 className={`text-base font-bold tracking-widest uppercase mb-4 ${card.border}`}>{card.title}</h3>
-                                    <p className="text-4xl font-extrabold tracking-tight text-white mb-5 leading-tight">{card.subtitle}</p>
+                                    <h3 className={`text-xs md:text-base font-bold tracking-widest uppercase mb-2 md:mb-4 ${card.border}`}>{card.title}</h3>
+                                    <p className="text-2xl md:text-4xl font-extrabold tracking-tight text-white mb-3 md:mb-5 leading-tight">{card.subtitle}</p>
                                 </div>
 
                                 <div className="relative z-10 pointer-events-none text-left">
-                                    <p className="text-lg font-light leading-relaxed text-white/70">{card.description}</p>
+                                    <p className="text-sm md:text-lg font-light leading-relaxed text-white/70">{card.description}</p>
                                 </div>
                             </motion.div>
                         );
@@ -109,7 +109,7 @@ export default function FeatureCarousel({ onSelectFeature }) {
 
                 <button
                     onClick={handleNext}
-                    className="absolute -right-28 z-30 p-6 rounded-full bg-white/5 hover:bg-white/20 backdrop-blur border border-white/10 transition-all text-white/50 hover:text-white"
+                    className="absolute -right-12 md:-right-28 z-30 p-3 md:p-6 rounded-full bg-white/5 hover:bg-white/20 backdrop-blur border border-white/10 transition-all text-white/50 hover:text-white"
                 >
                     <ChevronRight size={32} />
                 </button>
