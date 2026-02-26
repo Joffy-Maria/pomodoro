@@ -3,11 +3,31 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { MessageSquare, Send, X } from 'lucide-react';
 import { useSocket } from '../context/SocketContext';
 
-const ChatBox = ({ roomId, messages = [] }) => {
+const ChatBox = ({ roomId }) => {
     const { socket } = useSocket();
     const [isOpen, setIsOpen] = useState(false);
+    const [messages, setMessages] = useState([]);
     const [newMessage, setNewMessage] = useState('');
+    const [hasUnread, setHasUnread] = useState(false);
     const messagesEndRef = useRef(null);
+
+    // Subscribe directly to chat_sync from within ChatBox
+    useEffect(() => {
+        if (!socket) return;
+
+        const handleChatSync = (updatedChat) => {
+            setMessages(updatedChat);
+            if (!isOpen) setHasUnread(true);
+        };
+
+        socket.on('chat_sync', handleChatSync);
+        return () => socket.off('chat_sync', handleChatSync);
+    }, [socket, isOpen]);
+
+    // Clear unread badge when opened
+    useEffect(() => {
+        if (isOpen) setHasUnread(false);
+    }, [isOpen]);
 
     // Auto-scroll to bottom on new message
     useEffect(() => {
@@ -18,63 +38,76 @@ const ChatBox = ({ roomId, messages = [] }) => {
 
     const handleSendMessage = (e) => {
         e.preventDefault();
-        if (!newMessage.trim() || !socket) return;
+        const text = newMessage.trim();
+        if (!text || !socket) return;
 
-        // In a real app we'd have usernames, using socket.id snippet for now 
         const sender = `User-${socket.id.substring(0, 4)}`;
 
-        socket.emit('send_message', { roomId, sender, text: newMessage.trim() });
+        // Optimistic update: show own message immediately
+        const optimisticMsg = {
+            id: `opt-${Date.now()}`,
+            sender,
+            text,
+            timestamp: Date.now(),
+            optimistic: true,
+        };
+        setMessages(prev => [...prev, optimisticMsg]);
         setNewMessage('');
+
+        socket.emit('send_message', { roomId, sender, text });
     };
 
-    const hasUnread = !isOpen && messages.length > 0;
-
     return (
-        <div className="relative md:fixed md:bottom-6 md:left-6 z-40 flex flex-col items-center sm:items-start group/chatbox">
+        <div className="relative z-50 flex flex-col items-start group/chatbox">
 
             {/* The Chat Widget Body */}
             <AnimatePresence>
                 {isOpen && (
                     <motion.div
-                        initial={{ opacity: 0, scale: 0.9, transformOrigin: 'bottom' }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.9 }}
-                        transition={{ type: "spring", stiffness: 300, damping: 25 }}
-                        className="absolute bottom-[calc(100%+1rem)] left-1/2 -translate-x-1/2 sm:translate-x-0 sm:left-0 md:relative md:bottom-auto glass-panel w-[calc(100vw-3rem)] sm:w-80 h-[50vh] min-h-[300px] flex flex-col rounded-3xl md:mb-4 overflow-hidden border border-white/20 shadow-2xl backdrop-blur-xl bg-black/60"
+                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                        transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+                        className="absolute bottom-full mb-4 left-0 glass-panel w-[calc(100vw-3rem)] sm:w-80 h-[350px] rounded-3xl border border-white/20 shadow-2xl backdrop-blur-xl bg-[#09090b]/90 z-50 overflow-hidden flex flex-col"
                     >
                         {/* Header */}
-                        <div className="p-4 border-b border-white/10 flex justify-between items-center bg-white/5">
+                        <div className="p-4 border-b border-white/10 flex justify-between items-center bg-white/5 flex-shrink-0">
                             <div className="flex items-center gap-2">
                                 <MessageSquare size={18} className="text-emerald-400" />
                                 <h3 className="font-semibold text-white tracking-wide">Room Chat</h3>
                             </div>
+                            <button onClick={() => setIsOpen(false)} className="p-1 hover:bg-white/10 rounded-lg transition-colors text-white/50 hover:text-white">
+                                <X size={16} />
+                            </button>
                         </div>
 
                         {/* Message Feed */}
-                        <div className="flex-1 overflow-y-auto p-4 space-y-3">
+                        <div className="flex-1 overflow-y-auto p-4 space-y-3 min-h-0">
                             {messages.length === 0 ? (
-                                <div className="h-full flex flex-col items-center justify-center text-white/30 text-sm pb-8 text-center">
+                                <div className="h-full flex flex-col items-center justify-center text-white/30 text-sm text-center">
                                     <p>No messages yet.</p>
                                     <p className="text-xs mt-1">Start the conversation!</p>
                                 </div>
                             ) : (
                                 messages.map((msg, idx) => {
-                                    const isMe = msg.sender.includes(socket.id.substring(0, 4));
+                                    const isMe = socket && msg.sender.includes(socket.id.substring(0, 4));
                                     return (
                                         <div key={msg.id || idx} className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
-                                            <span className="text-[10px] text-white/30 mb-1 ml-1 tracking-wider uppercase">{isMe ? 'You' : msg.sender}</span>
-                                            <div className={`px-4 py-2 rounded-2xl max-w-[85%] text-sm break-words whitespace-pre-wrap ${isMe ? 'bg-emerald-600/80 text-white rounded-br-sm' : 'bg-white/10 text-white/90 rounded-bl-sm'}`}>
+                                            <span className="text-[10px] text-white/30 mb-1 tracking-wider uppercase">
+                                                {isMe ? 'You' : msg.sender}
+                                            </span>
+                                            <div className={`px-4 py-2 rounded-2xl max-w-[85%] text-sm break-words whitespace-pre-wrap ${isMe ? 'bg-emerald-600/80 text-white rounded-br-sm' : 'bg-white/10 text-white/90 rounded-bl-sm'} ${msg.optimistic ? 'opacity-70' : ''}`}>
                                                 {msg.text}
                                             </div>
                                         </div>
-                                    )
+                                    );
                                 })
                             )}
                             <div ref={messagesEndRef} />
                         </div>
 
                         {/* Input Area */}
-                        <div className="p-3 border-t border-white/10 bg-black/40">
+                        <div className="p-3 border-t border-white/10 bg-black/40 flex-shrink-0">
                             <form onSubmit={handleSendMessage} className="relative">
                                 <input
                                     type="text"

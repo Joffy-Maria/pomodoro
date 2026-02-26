@@ -25,7 +25,7 @@ function App() {
   return (
     <SocketProvider>
       <BrowserRouter>
-        <div className="w-full min-h-screen bg-dark-bg text-white overflow-hidden">
+        <div className="w-full min-h-screen bg-dark-bg text-white overflow-x-hidden relative">
           <AnimatedRoutes />
         </div>
       </BrowserRouter>

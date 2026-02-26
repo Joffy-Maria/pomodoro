@@ -199,12 +199,17 @@ io.on('connection', (socket) => {
 
     // Chat management
     socket.on('send_message', ({ roomId, sender, text }) => {
+        console.log("Server received message from", sender, "in room", roomId, ":", text);
         const room = RoomManager.getRoom(roomId);
         if (room && room.participants.includes(socket.id)) {
             const updatedChat = RoomManager.addChatMessage(roomId, sender, text);
+            console.log("Updated chat array:", updatedChat);
             if (updatedChat) {
+                console.log("Broadcasting chat_sync to room", roomId);
                 io.to(roomId).emit('chat_sync', updatedChat);
             }
+        } else {
+            console.log("Server error: Room not found or sender not participant.", { roomData: room, participant: socket.id });
         }
     });
 });

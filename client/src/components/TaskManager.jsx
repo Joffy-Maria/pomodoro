@@ -29,20 +29,16 @@ const TaskManager = ({ roomId, tasks }) => {
     const completedCount = tasks.filter(t => t.completed).length;
 
     return (
-        <div className="relative md:fixed md:bottom-6 md:right-10 z-40 flex flex-col items-center sm:items-end">
+        <div className="relative z-50 flex flex-col items-end">
 
             {/* The Task Widget Body */}
             <AnimatePresence>
                 {isOpen && (
                     <motion.div
-                        initial={{ opacity: 0, scale: 0.9, transformOrigin: 'bottom' }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.9 }}
-                        transition={{ type: "spring", stiffness: 300, damping: 25 }}
-                        className="absolute bottom-[calc(100%+1rem)] left-1/2 -translate-x-1/2 sm:translate-x-0 sm:left-auto sm:right-0 md:relative md:bottom-auto glass-panel w-[calc(100vw-3rem)] sm:w-80 max-h-[60vh] flex flex-col rounded-3xl md:mb-4 overflow-hidden border border-white/20 shadow-2xl backdrop-blur-xl bg-black/60"
+                        className="absolute bottom-full mb-4 right-0 glass-panel w-[calc(100vw-3rem)] sm:w-80 h-[350px] rounded-3xl border border-white/20 shadow-2xl backdrop-blur-xl bg-[#09090b]/90 z-50 overflow-hidden flex flex-col"
                     >
                         {/* Header */}
-                        <div className="p-4 border-b border-white/10 flex justify-between items-center bg-white/5">
+                        <div className="p-4 border-b border-white/10 flex justify-between items-center bg-white/5 h-[60px]">
                             <div className="flex items-center gap-2">
                                 <ListTodo size={18} className="text-purple-400" />
                                 <h3 className="font-semibold text-white tracking-wide">Session Tasks</h3>
@@ -53,7 +49,7 @@ const TaskManager = ({ roomId, tasks }) => {
                         </div>
 
                         {/* Task List */}
-                        <div className="flex-1 overflow-y-auto p-2 space-y-1 min-h-[150px]">
+                        <div className="h-[225px] overflow-y-auto p-2 space-y-1">
                             {tasks.length === 0 ? (
                                 <div className="h-full flex flex-col items-center justify-center text-white/30 text-sm py-8 text-center px-4">
                                     <p>No tasks yet.</p>

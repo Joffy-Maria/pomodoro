@@ -24,7 +24,7 @@ const Room = () => {
     const [timerState, setTimerState] = useState(null);
     const [displayTime, setDisplayTime] = useState('25:00');
     const [tasks, setTasks] = useState([]);
-    const [messages, setMessages] = useState([]);
+
 
     // UI States
     const [copied, setCopied] = useState(false);
@@ -105,20 +105,16 @@ const Room = () => {
         const handleTasksSync = (updatedTasks) => {
             setTasks(updatedTasks);
         };
-        const handleChatSync = (updatedChat) => {
-            setMessages(updatedChat);
-        };
+
 
         socket.on('timer_sync', handleTimerSync);
         socket.on('background_changed', handleBackgroundChanged);
         socket.on('tasks_sync', handleTasksSync);
-        socket.on('chat_sync', handleChatSync);
 
         return () => {
             socket.off('timer_sync', handleTimerSync);
             socket.off('background_changed', handleBackgroundChanged);
             socket.off('tasks_sync', handleTasksSync);
-            socket.off('chat_sync', handleChatSync);
         };
     }, [roomId, socket, isConnected, navigate]);
 
@@ -301,7 +297,7 @@ const Room = () => {
                 {/* Floating Widgets Wrapper */}
                 <div className="relative w-full z-40 mt-8 mb-4 px-4 flex flex-col sm:flex-row items-center justify-center sm:justify-between gap-4 md:fixed md:bottom-6 md:left-6 md:right-10 md:mt-0 md:mb-0 md:px-0 pointer-events-none">
                     <div className="pointer-events-auto w-full sm:w-auto flex justify-center sm:justify-start">
-                        <ChatBox roomId={roomId} messages={messages} />
+                        <ChatBox roomId={roomId} />
                     </div>
                     <div className="pointer-events-auto w-full sm:w-auto flex justify-center sm:justify-end">
                         <TaskManager roomId={roomId} tasks={tasks} />

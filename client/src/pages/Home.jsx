@@ -109,7 +109,7 @@ const Home = () => {
                                 onChange={(e) => setRoomIdInput(e.target.value.toUpperCase())}
                                 placeholder="Or Join By Room Code"
                                 className="flex-1 w-full bg-black/40 border-2 border-white/5 rounded-2xl px-6 py-4 text-white placeholder:text-white/30 focus:outline-none focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/50 transition-all uppercase tracking-widest shadow-inner text-sm backdrop-blur-md"
-                                maxLength={6}
+                                maxLength={20}
                             />
                             <InteractiveButton variant="primary" onClick={handleJoinRoom} className="w-full sm:w-auto px-8 !rounded-2xl">
                                 Join
