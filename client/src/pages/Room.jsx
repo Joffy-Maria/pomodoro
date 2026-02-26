@@ -24,7 +24,7 @@ const Room = () => {
     const [timerState, setTimerState] = useState(null);
     const [displayTime, setDisplayTime] = useState('25:00');
     const [tasks, setTasks] = useState([]);
-
+    const [initialMessages, setInitialMessages] = useState([]);
 
     // UI States
     const [copied, setCopied] = useState(false);
@@ -79,6 +79,7 @@ const Room = () => {
                             setRoomState(joinResponse.roomState);
                             setTimerState(joinResponse.roomState.timer);
                             setTasks(joinResponse.roomState.tasks || []);
+                            setInitialMessages(joinResponse.roomState.chat || []);
                         } else {
                             navigate('/home');
                         }
@@ -88,7 +89,7 @@ const Room = () => {
                     setRoomState(response.roomState);
                     setTimerState(response.roomState.timer);
                     setTasks(response.roomState.tasks || []);
-                    setMessages(response.roomState.chat || []);
+                    setInitialMessages(response.roomState.chat || []);
                 }
             } else {
                 navigate('/home'); // Room doesn't exist
@@ -297,7 +298,7 @@ const Room = () => {
                 {/* Floating Widgets Wrapper */}
                 <div className="relative w-full z-40 mt-8 mb-4 px-4 flex flex-col sm:flex-row items-center justify-center sm:justify-between gap-4 md:fixed md:bottom-6 md:left-6 md:right-10 md:mt-0 md:mb-0 md:px-0 pointer-events-none">
                     <div className="pointer-events-auto w-full sm:w-auto flex justify-center sm:justify-start">
-                        <ChatBox roomId={roomId} />
+                        <ChatBox roomId={roomId} initialMessages={initialMessages} />
                     </div>
                     <div className="pointer-events-auto w-full sm:w-auto flex justify-center sm:justify-end">
                         <TaskManager roomId={roomId} tasks={tasks} />

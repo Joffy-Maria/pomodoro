@@ -3,13 +3,20 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { MessageSquare, Send, X } from 'lucide-react';
 import { useSocket } from '../context/SocketContext';
 
-const ChatBox = ({ roomId }) => {
+const ChatBox = ({ roomId, initialMessages = [] }) => {
     const { socket } = useSocket();
     const [isOpen, setIsOpen] = useState(false);
-    const [messages, setMessages] = useState([]);
+    const [messages, setMessages] = useState(initialMessages);
     const [newMessage, setNewMessage] = useState('');
     const [hasUnread, setHasUnread] = useState(false);
     const messagesEndRef = useRef(null);
+
+    // Seed messages when initial history arrives from Room.jsx
+    useEffect(() => {
+        if (initialMessages.length > 0) {
+            setMessages(initialMessages);
+        }
+    }, [initialMessages]);
 
     // Subscribe directly to chat_sync from within ChatBox
     useEffect(() => {
