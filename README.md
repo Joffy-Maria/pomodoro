@@ -66,12 +66,7 @@ Promate uses an **Authoritative Server** model to orchestrate ephemeral rooms wi
 - **WebGL Particle Injection:** Normal DOM elements (`InteractiveButton`) are infused with nested `<Canvas>` components containing `@react-three/drei` Sparkles, merging basic HTML interactability with 3D particles on hover.
 - **Morphing Page Transitions:** Replaced CSS transitions with Framer Motion `AnimatePresence`. Page switches utilize smooth cubic-bezier (`[0.22, 1, 0.36, 1]`) interpolation.
 
-## Deployment Guidelines
-Since the architecture relies on sticky WebSockets and in-memory routing, the deployment dictates specific constraints.
+## 🚀 Deployment
 
-1. **Frontend:** Can be deployed to Vercel, Netlify, or AWS S3/Cloudfront.
-   - Run `npm run build` in `/client`.
-   - Update the `io('http://localhost:3001')` logic in `SocketContext.jsx` point to your production backend URL using an `.env` variable (e.g., `import.meta.env.VITE_SERVER_URL`).
-2. **Backend:** Demands a capable runtime for long-lived WebSocket connections (e.g., Render, Railway, AWS ECS, or DigitalOcean Droplets).
-   - Ensure the provider supports scaling *only if* using a Redis adapter (not implemented by design for simple ephemeral storage).
-   - Point the `origin` configurations in `server/src/index.js` to whitelist your frontend domain.
+For step-by-step instructions on how to deploy this application to **Vercel** and **Render**, please refer to the [Deployment Guide](./deployment_guide.md).
+

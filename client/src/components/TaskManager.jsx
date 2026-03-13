@@ -35,7 +35,7 @@ const TaskManager = ({ roomId, tasks }) => {
             <AnimatePresence>
                 {isOpen && (
                     <motion.div
-                        className="absolute bottom-full mb-4 right-0 glass-panel w-[calc(100vw-3rem)] sm:w-80 h-[350px] rounded-3xl border border-white/20 shadow-2xl backdrop-blur-xl bg-[#09090b]/90 z-50 overflow-hidden flex flex-col"
+                        className="absolute bottom-full mb-4 left-1/2 -translate-x-1/2 sm:left-auto sm:right-0 sm:translate-x-0 glass-panel w-[calc(100vw-2rem)] sm:w-80 h-[350px] rounded-3xl border border-white/20 shadow-2xl backdrop-blur-xl bg-[#09090b]/90 z-50 overflow-hidden flex flex-col"
                     >
                         {/* Header */}
                         <div className="p-4 border-b border-white/10 flex justify-between items-center bg-white/5 h-[60px]">
