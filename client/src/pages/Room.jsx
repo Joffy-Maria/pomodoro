@@ -280,7 +280,7 @@ const Room = () => {
                         <motion.div
                             className="text-[25vw] sm:text-[22vw] md:text-8xl lg:text-9xl font-extrabold tracking-tighter tabular-nums drop-shadow-[0_0_40px_currentColor] leading-none my-2 md:my-0"
                             animate={{
-                                color: isLightTheme ? '#000000' : (timerState?.mode === 'focus' ? '#e879f9' : '#34d399'),
+                                color: isLightTheme ? '#000000' : '#ffffff',
                                 scale: timerState?.status === 'running' ? [1, 1.02, 1] : 1
                             }}
                             style={{
