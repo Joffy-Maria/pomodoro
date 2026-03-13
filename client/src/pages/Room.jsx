@@ -180,11 +180,12 @@ const Room = () => {
     const isCustomUrl = currentBg.startsWith('custom:');
     const customUrlString = isCustomUrl ? currentBg.replace('custom:', '') : null;
 
+    const isLightTheme = currentBg === 'LighthouseOcean';
     const currentIframeUrl = !isCustomUrl && THEMES[currentBg] ? THEMES[currentBg] : THEMES.BloomingGarden;
 
     return (
         <PageTransition transitionType="morph">
-            <div className="relative min-h-[100dvh] w-full overflow-x-hidden overflow-y-auto bg-black text-white flex flex-col pt-24 pb-32 md:py-0 md:block">
+            <div className={`relative min-h-[100dvh] w-full overflow-x-hidden overflow-y-auto bg-black text-white flex flex-col pt-24 pb-32 md:py-0 md:block ${isLightTheme ? 'theme-light' : 'theme-dark'}`}>
 
                 {/* Background rendering (Custom string URL, local upload, or iFrame) */}
                 <div className="absolute inset-0 z-0 overflow-hidden bg-black">
@@ -209,19 +210,19 @@ const Room = () => {
                 <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-5 pointer-events-none mix-blend-overlay"></div>
 
                 {/* Top Bar */}
-                <div className="absolute top-0 left-0 right-0 p-4 md:p-6 flex justify-between items-center z-50 glass-panel rounded-b-2xl md:rounded-b-3xl border-t-0 shadow-lg">
+                <div className={`absolute top-0 left-0 right-0 p-4 md:p-6 flex justify-between items-center z-50 glass-panel rounded-b-2xl md:rounded-b-3xl border-t-0 shadow-lg ${isLightTheme ? 'bg-white/10' : ''}`}>
                     <div className="flex flex-col">
-                        <span className="text-xs md:text-sm text-white/50 tracking-widest uppercase">Session ID</span>
+                        <span className={`text-xs md:text-sm tracking-widest uppercase ${isLightTheme ? 'text-black/50' : 'text-white/50'}`}>Session ID</span>
                         <div className="flex items-center gap-2">
-                            <span className="text-lg md:text-xl font-bold tracking-widest text-purple-300">{roomId}</span>
-                            <button onClick={copyLink} className="p-1.5 md:p-2 hover:bg-white/10 rounded-lg transition-colors text-white/70 hover:text-white">
+                            <span className={`text-lg md:text-xl font-bold tracking-widest ${isLightTheme ? 'text-purple-600' : 'text-purple-300'}`}>{roomId}</span>
+                            <button onClick={copyLink} className={`p-1.5 md:p-2 rounded-lg transition-colors ${isLightTheme ? 'hover:bg-black/10 text-black/70 hover:text-black' : 'hover:bg-white/10 text-white/70 hover:text-white'}`}>
                                 {copied ? <Check size={14} className="text-green-400" /> : <Copy size={14} className="md:w-4 md:h-4" />}
                             </button>
                         </div>
                     </div>
 
                     <div className="relative">
-                        <InteractiveButton variant="secondary" onClick={() => setBgSelectionOpen(!bgSelectionOpen)} className="text-sm px-4 py-2">
+                        <InteractiveButton variant={isLightTheme ? "primary" : "secondary"} onClick={() => setBgSelectionOpen(!bgSelectionOpen)} className="text-sm px-4 py-2">
                             <ImageIcon size={16} className="mr-2" />
                             Theme
                         </InteractiveButton>
@@ -232,7 +233,7 @@ const Room = () => {
                                     initial={{ opacity: 0, y: 10, scale: 0.95 }}
                                     animate={{ opacity: 1, y: 0, scale: 1 }}
                                     exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                                    className="absolute right-0 top-full mt-4 w-56 glass-panel rounded-2xl p-2 flex flex-col gap-1 shadow-2xl border border-white/20 origin-top-right box-border"
+                                    className="absolute right-0 top-full mt-4 w-56 glass-panel rounded-2xl p-2 flex flex-col gap-1 shadow-2xl border border-white/20 origin-top-right box-border bg-[#09090b]/90"
                                 >
                                     {Object.keys(THEMES).map((theme) => (
                                         <button
@@ -257,19 +258,19 @@ const Room = () => {
 
                 {/* Timer Center Piece */}
                 <div className="relative md:absolute md:inset-0 flex flex-col items-center justify-center z-10 pointer-events-none px-4 flex-1">
-                    <div className="pointer-events-auto glass-panel p-6 md:p-12 rounded-[2rem] md:rounded-[3rem] w-full max-w-md md:max-w-max flex flex-col items-center gap-6 md:gap-10 border border-white/10 shadow-[0_0_50px_rgba(0,0,0,0.5)] backdrop-blur-xl mx-auto mt-4 md:mt-0">
+                    <div className={`pointer-events-auto glass-panel p-6 md:p-12 rounded-[2rem] md:rounded-[3rem] w-full max-w-md md:max-w-max flex flex-col items-center gap-6 md:gap-10 border border-white/10 shadow-[0_0_50px_rgba(0,0,0,0.5)] backdrop-blur-xl mx-auto mt-4 md:mt-0 ${isLightTheme ? 'bg-white/20 border-black/10' : ''}`}>
 
                         {/* Mode Selector */}
-                        <div className="flex gap-2 md:gap-4 p-1.5 md:p-2 bg-black/40 rounded-xl md:rounded-2xl w-full md:w-auto">
+                        <div className={`flex gap-2 md:gap-4 p-1.5 md:p-2 rounded-xl md:rounded-2xl w-full md:w-auto ${isLightTheme ? 'bg-black/10' : 'bg-black/40'}`}>
                             <button
                                 onClick={() => handleSwitchMode('focus')}
-                                className={`flex-1 md:flex-none px-4 md:px-6 py-2 rounded-lg md:rounded-xl text-xs md:text-sm font-medium transition-all ${timerState?.mode === 'focus' ? 'bg-purple-600 text-white shadow-lg shadow-purple-500/30' : 'text-white/50 hover:text-white'}`}
+                                className={`flex-1 md:flex-none px-4 md:px-6 py-2 rounded-lg md:rounded-xl text-xs md:text-sm font-medium transition-all ${timerState?.mode === 'focus' ? 'bg-purple-600 text-white shadow-lg shadow-purple-500/30' : (isLightTheme ? 'text-black/50 hover:text-black' : 'text-white/50 hover:text-white')}`}
                             >
                                 Focus
                             </button>
                             <button
                                 onClick={() => handleSwitchMode('break')}
-                                className={`flex-1 md:flex-none px-4 md:px-6 py-2 rounded-lg md:rounded-xl text-xs md:text-sm font-medium transition-all ${timerState?.mode === 'break' ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-500/30' : 'text-white/50 hover:text-white'}`}
+                                className={`flex-1 md:flex-none px-4 md:px-6 py-2 rounded-lg md:rounded-xl text-xs md:text-sm font-medium transition-all ${timerState?.mode === 'break' ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-500/30' : (isLightTheme ? 'text-black/50 hover:text-black' : 'text-white/50 hover:text-white')}`}
                             >
                                 Break
                             </button>
@@ -279,8 +280,11 @@ const Room = () => {
                         <motion.div
                             className="text-[25vw] sm:text-[22vw] md:text-8xl lg:text-9xl font-extrabold tracking-tighter tabular-nums drop-shadow-[0_0_40px_currentColor] leading-none my-2 md:my-0"
                             animate={{
-                                color: timerState?.mode === 'focus' ? '#e879f9' : '#34d399',
+                                color: isLightTheme ? '#000000' : (timerState?.mode === 'focus' ? '#e879f9' : '#34d399'),
                                 scale: timerState?.status === 'running' ? [1, 1.02, 1] : 1
+                            }}
+                            style={{
+                                filter: isLightTheme ? `drop-shadow(0 0 20px ${timerState?.mode === 'focus' ? 'rgba(168, 85, 247, 0.4)' : 'rgba(52, 211, 153, 0.4)'})` : undefined
                             }}
                             transition={{ duration: 2, repeat: timerState?.status === 'running' ? Infinity : 0, ease: "easeInOut" }}
                         >
@@ -313,7 +317,7 @@ const Room = () => {
                 </div>
 
                 {/* Floating Widgets Wrapper */}
-                <div className="relative w-full md:w-auto z-40 mt-8 mb-4 px-4 flex flex-col sm:flex-row items-center justify-center sm:justify-between gap-4 md:fixed md:bottom-6 md:left-6 md:right-10 md:mt-0 md:mb-0 md:px-0 pointer-events-none">
+                <div className="relative w-full md:w-auto z-40 mt-8 mb-4 px-4 flex flex-col sm:flex-row items-center justify-center sm:justify-between gap-4 md:fixed md:bottom-8 md:inset-x-0 md:px-8 md:mt-0 md:mb-0 md:px-0 pointer-events-none">
                     <div className="pointer-events-auto w-full sm:w-auto flex justify-center sm:justify-start">
                         <ChatBox roomId={roomId} initialMessages={initialMessages} username={username} />
                     </div>
