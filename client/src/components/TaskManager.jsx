@@ -40,7 +40,7 @@ const TaskManager = ({ roomId, tasks }) => {
                         {/* Header */}
                         <div className="p-4 border-b border-white/10 flex justify-between items-center bg-white/5 h-[60px]">
                             <div className="flex items-center gap-2">
-                                <ListTodo size={18} className="text-purple-400" />
+                                <ListTodo size={18} className="text-brand-300" />
                                 <h3 className="font-semibold text-white tracking-wide">Session Tasks</h3>
                             </div>
                             <span className="text-xs font-mono text-white/50 bg-black/40 px-2 py-1 rounded-md">
@@ -69,9 +69,9 @@ const TaskManager = ({ roomId, tasks }) => {
                                             <div className="flex items-center gap-3 overflow-hidden">
                                                 <button
                                                     onClick={() => handleToggleTask(task.id)}
-                                                    className={`shrink-0 w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${task.completed ? 'bg-emerald-500 border-emerald-500' : 'border-white/30 hover:border-purple-400'}`}
+                                                    className={`shrink-0 w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${task.completed ? 'bg-mint-500 border-mint-500' : 'border-white/30 hover:border-brand-400'}`}
                                                 >
-                                                    {task.completed && <Check size={12} className="text-white" />}
+                                                    {task.completed && <Check size={12} className="text-[#04120d]" />}
                                                 </button>
                                                 <span className={`text-sm truncate transition-all ${task.completed ? 'text-white/40 line-through' : 'text-white/90'}`}>
                                                     {task.text}
@@ -98,12 +98,12 @@ const TaskManager = ({ roomId, tasks }) => {
                                     value={newTaskText}
                                     onChange={(e) => setNewTaskText(e.target.value)}
                                     placeholder="Add a new task..."
-                                    className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-4 pr-12 text-base md:text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-purple-500/50 focus:bg-white/10 transition-all"
+                                    className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-4 pr-12 text-base md:text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-brand-400/60 focus:bg-white/10 transition-all"
                                 />
                                 <button
                                     type="submit"
                                     disabled={!newTaskText.trim()}
-                                    className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 bg-purple-600 rounded-lg text-white disabled:opacity-50 disabled:bg-white/10 transition-colors"
+                                    className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 bg-brand-500 rounded-lg text-white disabled:opacity-50 disabled:bg-white/10 transition-colors"
                                 >
                                     <Plus size={16} />
                                 </button>
@@ -118,13 +118,13 @@ const TaskManager = ({ roomId, tasks }) => {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setIsOpen(!isOpen)}
-                className={`w-14 h-14 rounded-2xl flex items-center justify-center shadow-2xl backdrop-blur-md border border-white/20 transition-colors overflow-hidden relative ${isOpen ? 'bg-purple-600/80 text-white' : 'glass-panel text-purple-300 hover:text-white hover:bg-white/10'}`}
+                className={`w-14 h-14 rounded-2xl flex items-center justify-center shadow-2xl backdrop-blur-md border border-white/20 transition-colors overflow-hidden relative ${isOpen ? 'bg-brand-500/85 text-white' : 'glass-panel text-brand-300 hover:text-white hover:bg-white/10'}`}
             >
                 {isOpen ? <X size={24} /> : <ListTodo size={24} />}
 
                 {/* Notification Badge */}
                 {!isOpen && tasks.length > 0 && tasks.filter(t => !t.completed).length > 0 && (
-                    <div className="absolute top-2 right-2 w-2.5 h-2.5 bg-pink-500 rounded-full border border-black animate-pulse" />
+                    <div className="absolute top-2 right-2 w-2.5 h-2.5 bg-focus-500 rounded-full border border-black animate-pulse" />
                 )}
             </motion.button>
 

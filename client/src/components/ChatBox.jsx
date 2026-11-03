@@ -80,7 +80,7 @@ const ChatBox = ({ roomId, initialMessages = [], username = '' }) => {
                         {/* Header */}
                         <div className="p-4 border-b border-white/10 flex justify-between items-center bg-white/5 flex-shrink-0">
                             <div className="flex items-center gap-2">
-                                <MessageSquare size={18} className="text-emerald-400" />
+                                <MessageSquare size={18} className="text-mint-300" />
                                 <h3 className="font-semibold text-white tracking-wide">Room Chat</h3>
                             </div>
                             <button onClick={() => setIsOpen(false)} className="p-1 hover:bg-white/10 rounded-lg transition-colors text-white/50 hover:text-white">
@@ -104,7 +104,7 @@ const ChatBox = ({ roomId, initialMessages = [], username = '' }) => {
                                             <span className="text-[10px] text-white/30 mb-1 tracking-wider uppercase">
                                                 {isMe ? 'You' : msg.sender}
                                             </span>
-                                            <div className={`px-4 py-2 rounded-2xl max-w-[85%] text-sm break-words whitespace-pre-wrap ${isMe ? 'bg-emerald-600/80 text-white rounded-br-sm' : 'bg-white/10 text-white/90 rounded-bl-sm'} ${msg.optimistic ? 'opacity-70' : ''}`}>
+                                            <div className={`px-4 py-2 rounded-2xl max-w-[85%] text-sm break-words whitespace-pre-wrap ${isMe ? 'bg-brand-500/85 text-white rounded-br-sm' : 'bg-white/10 text-white/90 rounded-bl-sm'} ${msg.optimistic ? 'opacity-70' : ''}`}>
                                                 {msg.text}
                                             </div>
                                         </div>
@@ -122,12 +122,12 @@ const ChatBox = ({ roomId, initialMessages = [], username = '' }) => {
                                     value={newMessage}
                                     onChange={(e) => setNewMessage(e.target.value)}
                                     placeholder="Type a message..."
-                                    className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-4 pr-12 text-base md:text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-emerald-500/50 focus:bg-white/10 transition-all"
+                                    className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-4 pr-12 text-base md:text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-brand-400/60 focus:bg-white/10 transition-all"
                                 />
                                 <button
                                     type="submit"
                                     disabled={!newMessage.trim()}
-                                    className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 bg-emerald-600 rounded-lg text-white disabled:opacity-50 disabled:bg-white/10 transition-colors"
+                                    className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 bg-brand-500 rounded-lg text-white disabled:opacity-50 disabled:bg-white/10 transition-colors"
                                 >
                                     <Send size={16} />
                                 </button>
@@ -142,13 +142,13 @@ const ChatBox = ({ roomId, initialMessages = [], username = '' }) => {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setIsOpen(!isOpen)}
-                className={`w-14 h-14 rounded-2xl flex items-center justify-center shadow-2xl backdrop-blur-md border border-white/20 transition-colors overflow-hidden relative ${isOpen ? 'bg-emerald-600/80 text-white' : 'glass-panel text-emerald-300 hover:text-white hover:bg-white/10'}`}
+                className={`w-14 h-14 rounded-2xl flex items-center justify-center shadow-2xl backdrop-blur-md border border-white/20 transition-colors overflow-hidden relative ${isOpen ? 'bg-brand-500/85 text-white' : 'glass-panel text-brand-300 hover:text-white hover:bg-white/10'}`}
             >
                 {isOpen ? <X size={24} /> : <MessageSquare size={24} />}
 
                 {/* Notification Badge */}
                 {hasUnread && (
-                    <div className="absolute top-2 right-2 w-2.5 h-2.5 bg-pink-500 rounded-full border border-black animate-pulse" />
+                    <div className="absolute top-2 right-2 w-2.5 h-2.5 bg-focus-500 rounded-full border border-black animate-pulse" />
                 )}
             </motion.button>
 

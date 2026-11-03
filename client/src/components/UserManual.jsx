@@ -1,7 +1,44 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Users, Focus, ListTodo, Palette, MessageSquare } from 'lucide-react';
-import PageTransition from './ui/PageTransition';
+
+const FEATURES = [
+    {
+        icon: Users,
+        title: 'Ephemeral shared rooms',
+        description:
+            'Create a room to instantly generate a unique session code. Anyone with the link is synced to the same timer — and the room disappears when the last person leaves.',
+        tone: 'bg-brand-500/12 text-brand-300 ring-brand-400/25',
+    },
+    {
+        icon: Focus,
+        title: 'Master timer control',
+        description:
+            'The host controls start, pause and reset. Everyone sees exactly the same second, because the server owns the clock rather than the browser.',
+        tone: 'bg-mint-500/12 text-mint-300 ring-mint-400/25',
+    },
+    {
+        icon: Palette,
+        title: 'Immersive environments',
+        description:
+            'Pick one of the curated 3D scenes or drop in a direct image/GIF URL. The host’s choice is shared with the whole room.',
+        tone: 'bg-focus-500/12 text-focus-300 ring-focus-400/25',
+    },
+    {
+        icon: ListTodo,
+        title: 'Shared task list',
+        description:
+            'Use the floating list in the room to track the block. Adding, ticking off or removing a task updates for everyone instantly.',
+        tone: 'bg-brand-500/12 text-brand-300 ring-brand-400/25',
+    },
+    {
+        icon: MessageSquare,
+        title: 'Real-time chat',
+        description:
+            'A lightweight chat lives beside the timer. Send a blocker, a link or a quiet “nice work” without leaving focus mode.',
+        tone: 'bg-mint-500/12 text-mint-300 ring-mint-400/25',
+    },
+];
 
 export default function UserManual({ isOpen, onClose }) {
     return (
@@ -11,103 +48,79 @@ export default function UserManual({ isOpen, onClose }) {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md px-4"
+                    transition={{ duration: 0.25 }}
+                    className="fixed inset-0 z-[110] flex items-center justify-center bg-ink-950/80 px-4 backdrop-blur-md"
+                    role="dialog"
+                    aria-modal="true"
+                    aria-label="Promate manual"
                 >
                     <motion.div
-                        initial={{ scale: 0.9, y: 20 }}
-                        animate={{ scale: 1, y: 0 }}
-                        className="glass-panel w-full max-w-2xl p-6 md:p-12 max-h-[85vh] overflow-y-auto overflow-x-hidden rounded-[2rem] shadow-2xl bg-[#09090b]/90 border border-white/10 relative"
+                        initial={{ scale: 0.96, y: 18, opacity: 0 }}
+                        animate={{ scale: 1, y: 0, opacity: 1 }}
+                        exit={{ scale: 0.97, y: 10, opacity: 0 }}
+                        transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+                        className="surface-raised relative max-h-[86vh] w-full max-w-2xl overflow-y-auto overflow-x-hidden p-6 sm:p-9 md:p-11"
                     >
-                        {/* Background Decoration */}
-                        <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
-                        <div className="absolute bottom-0 left-0 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
+                        {/* Background decoration */}
+                        <div
+                            className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-brand-500/18 blur-3xl"
+                            aria-hidden="true"
+                        />
+                        <div
+                            className="pointer-events-none absolute -bottom-20 -left-16 h-56 w-56 rounded-full bg-focus-500/12 blur-3xl"
+                            aria-hidden="true"
+                        />
 
-                        {/* Close Button */}
                         <button
+                            type="button"
                             onClick={onClose}
-                            className="absolute top-6 right-6 p-2 rounded-full bg-white/5 hover:bg-white/20 text-white/50 hover:text-white transition-colors z-10"
+                            aria-label="Close manual"
+                            className="absolute right-5 top-5 z-10 grid h-9 w-9 place-items-center rounded-full border border-white/10 bg-white/5 text-slate-400 transition-colors hover:bg-white/10 hover:text-white"
                         >
-                            <X size={20} />
+                            <X size={18} />
                         </button>
 
-                        <div className="relative z-10 space-y-8">
-                            <div className="space-y-2 text-center">
-                                <h2 className="text-3xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-emerald-400 to-blue-400">
-                                    Promate Manual
+                        <div className="relative z-10 space-y-7">
+                            <header className="space-y-2 pr-10">
+                                <span className="chip">The manual</span>
+                                <h2 className="font-display text-2xl font-bold text-white sm:text-3xl">
+                                    How <span className="text-gradient">Promate</span> works
                                 </h2>
-                                <p className="text-white/60 font-light text-sm tracking-wide">
-                                    Ephemeral flow-state synchronization. No databases. No accounts.
+                                <p className="max-w-lg text-sm leading-relaxed text-slate-400">
+                                    Ephemeral, synchronized focus. No accounts, no database — one timer
+                                    shared by everyone in the room.
                                 </p>
+                            </header>
+
+                            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                                {FEATURES.map((feature) => {
+                                    const Icon = feature.icon;
+                                    return (
+                                        <div
+                                            key={feature.title}
+                                            className="rounded-2xl border border-white/[0.07] bg-white/[0.03] p-4 transition-colors hover:border-white/[0.14] hover:bg-white/[0.05]"
+                                        >
+                                            <span
+                                                className={`inline-grid h-9 w-9 place-items-center rounded-xl ring-1 ring-inset ${feature.tone}`}
+                                            >
+                                                <Icon size={17} />
+                                            </span>
+                                            <h3 className="mt-3 text-sm font-semibold text-white">
+                                                {feature.title}
+                                            </h3>
+                                            <p className="mt-1.5 text-xs leading-relaxed text-slate-400">
+                                                {feature.description}
+                                            </p>
+                                        </div>
+                                    );
+                                })}
                             </div>
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
-
-                                {/* Feature 1 */}
-                                <div className="space-y-3 p-5 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors">
-                                    <div className="w-10 h-10 rounded-xl bg-pink-500/20 text-pink-400 flex items-center justify-center">
-                                        <Users size={20} />
-                                    </div>
-                                    <h3 className="text-white font-semibold">Ephemeral Shared Rooms</h3>
-                                    <p className="text-white/50 text-sm leading-relaxed">
-                                        Create a room to instantly generate a unique session link. Anyone with the link is immediately synced to your master timer.
-                                    </p>
-                                </div>
-
-                                {/* Feature 2 */}
-                                <div className="space-y-3 p-5 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors">
-                                    <div className="w-10 h-10 rounded-xl bg-purple-500/20 text-purple-400 flex items-center justify-center">
-                                        <Focus size={20} />
-                                    </div>
-                                    <h3 className="text-white font-semibold">Master Timer Control</h3>
-                                    <p className="text-white/50 text-sm leading-relaxed">
-                                        The host controls the Start, Pause, and Reset commands. Everyone sees exactly what the host sees within milliseconds.
-                                    </p>
-                                </div>
-
-                                {/* Feature 3 */}
-                                <div className="space-y-3 p-5 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors">
-                                    <div className="w-10 h-10 rounded-xl bg-blue-500/20 text-blue-400 flex items-center justify-center">
-                                        <Palette size={20} />
-                                    </div>
-                                    <h3 className="text-white font-semibold">3D Environments</h3>
-                                    <p className="text-white/50 text-sm leading-relaxed">
-                                        Select from curated 3D CodePen themes or upload a direct image/GIF URL. The host's 3D theme is synced across all clients.
-                                    </p>
-                                </div>
-
-                                {/* Feature 4 */}
-                                <div className="space-y-3 p-5 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors">
-                                    <div className="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
-                                        <ListTodo size={20} />
-                                    </div>
-                                    <h3 className="text-white font-semibold">Shared Task List</h3>
-                                    <p className="text-white/50 text-sm leading-relaxed">
-                                        Use the floating button in the room to track team goals. Adding, toggling, or removing a task updates for everyone instantly.
-                                    </p>
-                                </div>
-
-                                {/* Feature 5 */}
-                                <div className="space-y-3 p-5 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors md:col-span-2 lg:col-span-1">
-                                    <div className="w-10 h-10 rounded-xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center">
-                                        <MessageSquare size={20} />
-                                    </div>
-                                    <h3 className="text-white font-semibold">Real-Time Chat</h3>
-                                    <p className="text-white/50 text-sm leading-relaxed">
-                                        Communicate with everyone in the room via the bottom-left chat panel. Send quick messages without leaving your state of flow.
-                                    </p>
-                                </div>
-
-                            </div>
-
-                            <div className="pt-6 flex justify-center">
-                                <button
-                                    onClick={onClose}
-                                    className="px-8 py-3 rounded-full bg-white/10 hover:bg-white/20 text-white text-sm font-semibold tracking-wide transition-all"
-                                >
-                                    Got it, let's focus
+                            <div className="flex justify-center pt-1">
+                                <button type="button" onClick={onClose} className="btn btn-primary">
+                                    Got it, let&apos;s focus
                                 </button>
                             </div>
-
                         </div>
                     </motion.div>
                 </motion.div>

@@ -151,6 +151,24 @@ io.on('connection', (socket) => {
         }
     });
 
+    // Configure the focus block length before it starts
+    socket.on('set_focus_duration', ({ roomId, minutes }, callback) => {
+        const room = RoomManager.getRoom(roomId);
+        if (
+            room &&
+            room.participants.includes(socket.id) &&
+            Number.isFinite(Number(minutes))
+        ) {
+            RoomManager.setFocusDuration(roomId, Number(minutes));
+            io.to(roomId).emit('timer_sync', room.timer);
+            if (typeof callback === 'function') {
+                callback({ success: true, timer: room.timer });
+            }
+        } else if (typeof callback === 'function') {
+            callback({ success: false, message: 'Unable to update duration' });
+        }
+    });
+
     // Background selection
     socket.on('change_background', ({ roomId, background }) => {
         const room = RoomManager.getRoom(roomId);

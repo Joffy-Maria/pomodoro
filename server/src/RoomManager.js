@@ -119,6 +119,21 @@ class RoomManager {
     return true;
   }
 
+  setFocusDuration(roomId, minutes) {
+    const room = this.rooms.get(roomId);
+    if (!room) return false;
+
+    const seconds = Math.min(180, Math.max(1, Math.round(minutes))) * 60;
+    room.settings.focusDuration = seconds;
+
+    // Only resize the clock if a focus block hasn't started yet.
+    if (room.timer.mode === 'focus' && room.timer.status === 'stopped') {
+      room.timer.duration = seconds;
+      room.timer.timeRemaining = seconds;
+    }
+    return true;
+  }
+
   // Task Management
   addTask(roomId, taskText) {
     const room = this.rooms.get(roomId);

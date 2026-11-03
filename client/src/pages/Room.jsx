@@ -1,12 +1,17 @@
-import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import React, { useEffect, useRef, useState } from 'react';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Copy, Play, Pause, RotateCcw, Image as ImageIcon, Check } from 'lucide-react';
+import { ArrowLeft, Copy, Play, Pause, RotateCcw, Image as ImageIcon, Check } from 'lucide-react';
 import { useSocket } from '../context/SocketContext';
 import PageTransition from '../components/ui/PageTransition';
 import InteractiveButton from '../components/ui/InteractiveButton';
 import TaskManager from '../components/TaskManager';
 import ChatBox from '../components/ChatBox';
+import {
+    getDisplayName,
+    recordFocusComplete,
+    setDisplayName as persistDisplayName,
+} from '../lib/stats';
 
 const THEMES = {
     BloomingGarden: 'https://codepen.io/animmaster_studio/embed/jEqpopr?default-tab=result&theme-id=dark',
@@ -30,9 +35,18 @@ const Room = () => {
     const [copied, setCopied] = useState(false);
     const [bgSelectionOpen, setBgSelectionOpen] = useState(false);
     const [customGif, setCustomGif] = useState(null);
-    const [username, setUsername] = useState('');
+    const [username, setUsername] = useState(() => getDisplayName());
     const [usernameInput, setUsernameInput] = useState('');
     const [showUsernameModal, setShowUsernameModal] = useState(false);
+
+    // Guards against recording the same finished block twice.
+    const recordedEndRef = useRef(null);
+
+    const updateDisplay = (seconds) => {
+        const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+        const s = (seconds % 60).toString().padStart(2, '0');
+        setDisplayTime(`${m}:${s}`);
+    };
 
     // Sync Timer Display
     useEffect(() => {
@@ -47,6 +61,15 @@ const Room = () => {
 
                 if (remainingRaw <= 0) {
                     clearInterval(interval);
+
+                    // Track completed focus blocks once per timer run (local only).
+                    if (timerState.mode === 'focus' && recordedEndRef.current !== timerState.endTime) {
+                        recordedEndRef.current = timerState.endTime;
+                        recordFocusComplete({
+                            roomId,
+                            minutes: Math.round((timerState.duration || 1500) / 60),
+                        });
+                    }
                 }
             }, 500);
         } else {
@@ -54,13 +77,7 @@ const Room = () => {
         }
 
         return () => clearInterval(interval);
-    }, [timerState]);
-
-    const updateDisplay = (seconds) => {
-        const m = Math.floor(seconds / 60).toString().padStart(2, '0');
-        const s = (seconds % 60).toString().padStart(2, '0');
-        setDisplayTime(`${m}:${s}`);
-    };
+    }, [timerState, roomId]);
 
     // Socket Events
     useEffect(() => {
@@ -156,8 +173,26 @@ const Room = () => {
         setTimeout(() => setCopied(false), 2000);
     };
 
+    // Prompt for a display name once the room is ready (if not already saved).
+    useEffect(() => {
+        if (!roomState || username) return undefined;
+        const timer = setTimeout(() => setShowUsernameModal(true), 250);
+        return () => clearTimeout(timer);
+    }, [roomState, username]);
+
     if (!roomState) {
-        return <div className="min-h-screen bg-black text-white flex items-center justify-center">Syncing Session...</div>;
+        return (
+            <div className="flex min-h-screen flex-col items-center justify-center gap-5 bg-ink-950 px-6 text-center">
+                <div className="h-10 w-10 animate-spin rounded-full border-2 border-white/10 border-t-brand-400" />
+                <div>
+                    <p className="font-display text-lg font-semibold text-white">Syncing your session</p>
+                    <p className="mt-1 text-sm text-slate-500">Connecting the timer, tasks and chat…</p>
+                </div>
+                <Link to="/dashboard" className="btn btn-ghost py-2 text-xs">
+                    Back to dashboard
+                </Link>
+            </div>
+        );
     }
 
     // Show username prompt after room loads (if not set)
@@ -166,13 +201,9 @@ const Room = () => {
         const name = usernameInput.trim();
         if (!name) return;
         setUsername(name);
+        persistDisplayName(name);
         setShowUsernameModal(false);
     };
-
-    // Trigger modal once room is ready and username isn't set
-    if (!username && !showUsernameModal) {
-        setTimeout(() => setShowUsernameModal(true), 0);
-    }
 
     const currentBg = roomState.settings.background;
 
@@ -207,17 +238,29 @@ const Room = () => {
                 </div>
 
                 {/* Noise overlay */}
-                <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-5 pointer-events-none mix-blend-overlay"></div>
+                <div className="noise-overlay absolute inset-0 opacity-5 pointer-events-none mix-blend-overlay"></div>
 
                 {/* Top Bar */}
                 <div className={`absolute top-0 left-0 right-0 p-4 md:p-6 flex justify-between items-center z-50 glass-panel rounded-b-2xl md:rounded-b-3xl border-t-0 shadow-lg ${isLightTheme ? 'bg-white/10' : ''}`}>
-                    <div className="flex flex-col">
-                        <span className={`text-xs md:text-sm tracking-widest uppercase ${isLightTheme ? 'text-black/50' : 'text-white/50'}`}>Session ID</span>
-                        <div className="flex items-center gap-2">
-                            <span className={`text-lg md:text-xl font-bold tracking-widest ${isLightTheme ? 'text-purple-600' : 'text-purple-300'}`}>{roomId}</span>
-                            <button onClick={copyLink} className={`p-1.5 md:p-2 rounded-lg transition-colors ${isLightTheme ? 'hover:bg-black/10 text-black/70 hover:text-black' : 'hover:bg-white/10 text-white/70 hover:text-white'}`}>
-                                {copied ? <Check size={14} className="text-green-400" /> : <Copy size={14} className="md:w-4 md:h-4" />}
-                            </button>
+                    <div className="flex items-center gap-3">
+                        <Link
+                            to="/dashboard"
+                            aria-label="Back to dashboard"
+                            className={`grid h-9 w-9 place-items-center rounded-xl border transition-colors ${isLightTheme
+                                ? 'border-black/10 bg-black/5 text-black/60 hover:bg-black/10 hover:text-black'
+                                : 'border-white/10 bg-white/5 text-white/60 hover:bg-white/10 hover:text-white'
+                                }`}
+                        >
+                            <ArrowLeft size={16} />
+                        </Link>
+                        <div className="flex flex-col">
+                            <span className={`text-xs md:text-sm tracking-widest uppercase ${isLightTheme ? 'text-black/50' : 'text-white/50'}`}>Session ID</span>
+                            <div className="flex items-center gap-2">
+                                <span className={`text-lg md:text-xl font-bold tracking-widest ${isLightTheme ? 'text-brand-300' : 'text-brand-300'}`}>{roomId}</span>
+                                <button onClick={copyLink} className={`p-1.5 md:p-2 rounded-lg transition-colors ${isLightTheme ? 'hover:bg-black/10 text-black/70 hover:text-black' : 'hover:bg-white/10 text-white/70 hover:text-white'}`}>
+                                    {copied ? <Check size={14} className="text-mint-400" /> : <Copy size={14} className="md:w-4 md:h-4" />}
+                                </button>
+                            </div>
                         </div>
                     </div>
 
@@ -239,13 +282,13 @@ const Room = () => {
                                         <button
                                             key={theme}
                                             onClick={() => handleChangeBg(theme)}
-                                            className={`text-left px-4 py-3 rounded-xl text-sm transition-all ${currentBg === theme && !customGif ? 'bg-purple-500/30 text-white' : 'hover:bg-white/10 text-white/70'}`}
+                                            className={`text-left px-4 py-3 rounded-xl text-sm transition-all ${currentBg === theme && !customGif ? 'bg-brand-500/30 text-white' : 'hover:bg-white/10 text-white/70'}`}
                                         >
                                             {theme.replace(/([A-Z])/g, ' $1').trim()}
                                         </button>
                                     ))}
                                     <div className="h-px bg-white/10 my-1 mx-2"></div>
-                                    <label className="text-left px-4 py-3 rounded-xl text-sm transition-all hover:bg-white/10 text-emerald-300 cursor-pointer flex items-center justify-between">
+                                    <label className="text-left px-4 py-3 rounded-xl text-sm transition-all hover:bg-white/10 text-mint-300 cursor-pointer flex items-center justify-between">
                                         Upload Local File
                                         <input type="file" accept="image/gif, image/jpeg, image/png" className="hidden" onChange={handleGifUpload} />
                                     </label>
@@ -264,13 +307,13 @@ const Room = () => {
                         <div className={`flex gap-2 md:gap-4 p-1.5 md:p-2 rounded-xl md:rounded-2xl w-full md:w-auto ${isLightTheme ? 'bg-black/10' : 'bg-black/40'}`}>
                             <button
                                 onClick={() => handleSwitchMode('focus')}
-                                className={`flex-1 md:flex-none px-4 md:px-6 py-2 rounded-lg md:rounded-xl text-xs md:text-sm font-medium transition-all ${timerState?.mode === 'focus' ? 'bg-purple-600 text-white shadow-lg shadow-purple-500/30' : (isLightTheme ? 'text-black/50 hover:text-black' : 'text-white/50 hover:text-white')}`}
+                                className={`flex-1 md:flex-none px-4 md:px-6 py-2 rounded-lg md:rounded-xl text-xs md:text-sm font-medium transition-all ${timerState?.mode === 'focus' ? 'bg-brand-500 text-white shadow-lg shadow-brand-500/30' : (isLightTheme ? 'text-black/50 hover:text-black' : 'text-white/50 hover:text-white')}`}
                             >
                                 Focus
                             </button>
                             <button
                                 onClick={() => handleSwitchMode('break')}
-                                className={`flex-1 md:flex-none px-4 md:px-6 py-2 rounded-lg md:rounded-xl text-xs md:text-sm font-medium transition-all ${timerState?.mode === 'break' ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-500/30' : (isLightTheme ? 'text-black/50 hover:text-black' : 'text-white/50 hover:text-white')}`}
+                                className={`flex-1 md:flex-none px-4 md:px-6 py-2 rounded-lg md:rounded-xl text-xs md:text-sm font-medium transition-all ${timerState?.mode === 'break' ? 'bg-mint-500 text-[#04120d] shadow-lg shadow-mint-500/30' : (isLightTheme ? 'text-black/50 hover:text-black' : 'text-white/50 hover:text-white')}`}
                             >
                                 Break
                             </button>
@@ -294,16 +337,16 @@ const Room = () => {
                         {/* Controls */}
                         <div className="flex gap-4 md:gap-6 items-center">
                             {timerState?.status !== 'running' ? (
-                                <InteractiveButton variant="primary" onClick={() => handleCommand('start')} className="w-16 h-16 md:w-20 md:h-20 !rounded-full p-0 flex items-center justify-center bg-white text-black hover:bg-slate-200">
+                                <InteractiveButton variant="primary" onClick={() => handleCommand('start')} className="w-16 h-16 md:w-20 md:h-20 rounded-full! p-0 flex items-center justify-center bg-white text-black hover:bg-slate-200">
                                     <Play size={24} className="ml-1 md:w-8 md:h-8 md:ml-2" />
                                 </InteractiveButton>
                             ) : (
-                                <InteractiveButton variant="secondary" onClick={() => handleCommand('pause')} className="w-16 h-16 md:w-20 md:h-20 !rounded-full p-0 flex items-center justify-center border-2 border-white/30 text-white hover:bg-white/10">
+                                <InteractiveButton variant="secondary" onClick={() => handleCommand('pause')} className="w-16 h-16 md:w-20 md:h-20 rounded-full! p-0 flex items-center justify-center border-2 border-white/30 text-white hover:bg-white/10">
                                     <Pause size={24} className="md:w-8 md:h-8" />
                                 </InteractiveButton>
                             )}
 
-                            <InteractiveButton variant="ghost" onClick={() => handleCommand('reset')} className="w-14 h-14 md:w-16 md:h-16 !rounded-full p-0 flex items-center justify-center md:mt-2 group">
+                            <InteractiveButton variant="ghost" onClick={() => handleCommand('reset')} className="w-14 h-14 md:w-16 md:h-16 rounded-full! p-0 flex items-center justify-center md:mt-2 group">
                                 <RotateCcw size={20} className="md:w-6 md:h-6 group-hover:-rotate-90 transition-transform duration-500" />
                             </InteractiveButton>
                         </div>
@@ -344,7 +387,7 @@ const Room = () => {
                             className="glass-panel w-full max-w-sm p-8 rounded-3xl shadow-2xl border border-white/10 bg-[#09090b]/95 space-y-6"
                         >
                             <div className="space-y-2 text-center">
-                                <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center mx-auto mb-4">
+                                <div className="w-12 h-12 rounded-2xl bg-brand-500/15 border border-brand-400/30 flex items-center justify-center mx-auto mb-4">
                                     <span className="text-2xl">👤</span>
                                 </div>
                                 <h2 className="text-xl font-bold text-white">What's your name?</h2>
@@ -358,12 +401,12 @@ const Room = () => {
                                     placeholder="Enter your display name..."
                                     autoFocus
                                     maxLength={20}
-                                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-base text-white placeholder:text-white/30 focus:outline-none focus:border-emerald-500/50 transition-all"
+                                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-base text-white placeholder:text-white/30 focus:outline-none focus:border-brand-400/60 transition-all"
                                 />
                                 <button
                                     type="submit"
                                     disabled={!usernameInput.trim()}
-                                    className="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 disabled:cursor-not-allowed text-white font-semibold transition-colors"
+                                    className="w-full py-3 rounded-xl bg-brand-500 hover:bg-brand-400 disabled:opacity-40 disabled:cursor-not-allowed text-white font-semibold transition-colors"
                                 >
                                     Join Session
                                 </button>
