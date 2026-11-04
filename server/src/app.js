@@ -23,13 +23,16 @@ const io = new Server(httpServer, {
 io.on('connection', (socket) => {
     console.log(`User connected: ${socket.id}`);
 
-    // Create a new room
-    socket.on('create_room', (callback) => {
-        const roomId = RoomManager.createRoom(socket.id);
+    // Create a new room. Solo rooms skip chat entirely.
+    socket.on('create_room', (payload, callback) => {
+        const options = typeof payload === 'function' ? {} : payload || {};
+        const respond = typeof payload === 'function' ? payload : callback;
+
+        const roomId = RoomManager.createRoom(socket.id, { isSolo: options.isSolo });
         socket.join(roomId);
 
-        if (typeof callback === 'function') {
-            callback({ success: true, roomId, roomState: RoomManager.getRoom(roomId) });
+        if (typeof respond === 'function') {
+            respond({ success: true, roomId, roomState: RoomManager.getRoom(roomId) });
         }
     });
 
@@ -220,10 +223,10 @@ io.on('connection', (socket) => {
         }
     });
 
-    // Chat management
+    // Chat management (shared rooms only)
     socket.on('send_message', ({ roomId, sender, text }) => {
         const room = RoomManager.getRoom(roomId);
-        if (!room) return; // Room doesn't exist at all
+        if (!room || room.isSolo) return; // Solo rooms have no chat
 
         // Auto-join if not already a participant (handles reconnect edge cases)
         if (!room.participants.includes(socket.id)) {

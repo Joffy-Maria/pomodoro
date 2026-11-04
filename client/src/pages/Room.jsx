@@ -174,8 +174,9 @@ const Room = () => {
     };
 
     // Prompt for a display name once the room is ready (if not already saved).
+    // Solo rooms have no chat, so there is nobody to introduce yourself to.
     useEffect(() => {
-        if (!roomState || username) return undefined;
+        if (!roomState || username || roomState.isSolo) return undefined;
         const timer = setTimeout(() => setShowUsernameModal(true), 250);
         return () => clearTimeout(timer);
     }, [roomState, username]);
@@ -186,7 +187,7 @@ const Room = () => {
                 <div className="h-10 w-10 animate-spin rounded-full border-2 border-white/10 border-t-brand-400" />
                 <div>
                     <p className="font-display text-lg font-semibold text-white">Syncing your session</p>
-                    <p className="mt-1 text-sm text-slate-500">Connecting the timer, tasks and chat…</p>
+                    <p className="mt-1 text-sm text-slate-500">Setting up your focus space…</p>
                 </div>
                 <Link to="/dashboard" className="btn btn-ghost py-2 text-xs">
                     Back to dashboard
@@ -194,6 +195,9 @@ const Room = () => {
             </div>
         );
     }
+
+    // Solo sessions are chat-free; everything else stays the same.
+    const isSolo = Boolean(roomState.isSolo);
 
     // Show username prompt after room loads (if not set)
     const handleSetUsername = (e) => {
@@ -355,15 +359,19 @@ const Room = () => {
 
                     {/* Participants count indicator */}
                     <div className="mt-8 px-6 py-2 glass-panel rounded-full text-sm text-white/50 tracking-widest font-medium mx-auto">
-                        {roomState.participants?.length || 1} Syncing Participant(s)
+                        {isSolo
+                            ? 'Solo focus session'
+                            : `${roomState.participants?.length || 1} Syncing Participant(s)`}
                     </div>
                 </div>
 
                 {/* Floating Widgets Wrapper */}
                 <div className="relative w-full md:w-auto z-40 mt-8 mb-4 px-4 flex flex-col sm:flex-row items-center justify-center sm:justify-between gap-4 md:fixed md:bottom-8 md:inset-x-0 md:px-8 md:mt-0 md:mb-0 md:px-0 pointer-events-none">
-                    <div className="pointer-events-auto w-full sm:w-auto flex justify-center sm:justify-start">
-                        <ChatBox roomId={roomId} initialMessages={initialMessages} username={username} />
-                    </div>
+                    {!isSolo && (
+                        <div className="pointer-events-auto w-full sm:w-auto flex justify-center sm:justify-start">
+                            <ChatBox roomId={roomId} initialMessages={initialMessages} username={username} />
+                        </div>
+                    )}
                     <div className="pointer-events-auto w-full sm:w-auto flex justify-center sm:justify-end">
                         <TaskManager roomId={roomId} tasks={tasks} />
                     </div>

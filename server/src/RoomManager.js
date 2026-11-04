@@ -4,11 +4,12 @@ class RoomManager {
     this.rooms = new Map();
   }
 
-  createRoom(hostSocketId) {
+  createRoom(hostSocketId, { isSolo = false } = {}) {
     const roomId = Math.random().toString(36).substring(2, 8).toUpperCase();
     this.rooms.set(roomId, {
       id: roomId,
       host: hostSocketId,
+      isSolo: Boolean(isSolo),
       participants: [hostSocketId],
       requests: [], // users asking to join
       tasks: [], // tasks for the session { id, text, completed }
@@ -171,7 +172,7 @@ class RoomManager {
   // --- CHAT SYSTEM ---
   addChatMessage(roomId, sender, text) {
     const room = this.rooms.get(roomId);
-    if (!room) return null;
+    if (!room || room.isSolo) return null;
 
     const message = {
       id: Date.now().toString() + Math.random().toString(36).substr(2, 5),

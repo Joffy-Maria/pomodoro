@@ -145,7 +145,7 @@ const Dashboard = () => {
         setDisplayName(value);
     };
 
-    const createRoom = () => {
+    const createRoom = (mode = 'shared') => {
         if (!socket || !isConnected) {
             setError('Still connecting to the server. Give it a moment and try again.');
             return;
@@ -154,7 +154,7 @@ const Dashboard = () => {
         setLoading(true);
         setError('');
 
-        socket.emit('create_room', (response) => {
+        socket.emit('create_room', { isSolo: mode === 'solo' }, (response) => {
             setLoading(false);
             if (!response?.success) {
                 setError('Could not create a session. Please try again.');
@@ -521,7 +521,7 @@ const Dashboard = () => {
                                 <div className="mt-6 grid gap-3 sm:grid-cols-2">
                                     <button
                                         type="button"
-                                        onClick={createRoom}
+                                        onClick={() => createRoom('solo')}
                                         disabled={!isConnected || loading}
                                         className="btn btn-primary w-full"
                                     >
@@ -530,7 +530,7 @@ const Dashboard = () => {
                                     </button>
                                     <button
                                         type="button"
-                                        onClick={createRoom}
+                                        onClick={() => createRoom('shared')}
                                         disabled={!isConnected || loading}
                                         className="btn btn-ghost w-full"
                                     >

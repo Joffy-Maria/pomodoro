@@ -35,7 +35,7 @@ const FEATURES = [
         icon: MessageSquare,
         title: 'Real-time chat',
         description:
-            'A lightweight chat lives beside the timer. Send a blocker, a link or a quiet “nice work” without leaving focus mode.',
+            'Shared rooms get a lightweight chat beside the timer. Send a blocker, a link or a quiet “nice work” without leaving focus mode. Solo sessions stay chat-free.',
         tone: 'bg-mint-500/12 text-mint-300 ring-mint-400/25',
     },
 ];
