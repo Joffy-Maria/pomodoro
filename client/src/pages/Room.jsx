@@ -7,6 +7,7 @@ import PageTransition from '../components/ui/PageTransition';
 import InteractiveButton from '../components/ui/InteractiveButton';
 import TaskManager from '../components/TaskManager';
 import ChatBox from '../components/ChatBox';
+import MusicPlayer from '../components/MusicPlayer';
 import {
     getDisplayName,
     recordFocusComplete,
@@ -372,6 +373,9 @@ const Room = () => {
                             <ChatBox roomId={roomId} initialMessages={initialMessages} username={username} />
                         </div>
                     )}
+                    <div className="pointer-events-auto w-full sm:w-auto flex justify-center">
+                        <MusicPlayer />
+                    </div>
                     <div className="pointer-events-auto w-full sm:w-auto flex justify-center sm:justify-end">
                         <TaskManager roomId={roomId} tasks={tasks} />
                     </div>

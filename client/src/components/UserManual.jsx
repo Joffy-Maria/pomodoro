@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Users, Focus, ListTodo, Palette, MessageSquare } from 'lucide-react';
+import { X, Users, Focus, ListTodo, Palette, MessageSquare, Music2 } from 'lucide-react';
 
 const FEATURES = [
     {
@@ -37,6 +37,13 @@ const FEATURES = [
         description:
             'Shared rooms get a lightweight chat beside the timer. Send a blocker, a link or a quiet “nice work” without leaving focus mode. Solo sessions stay chat-free.',
         tone: 'bg-mint-500/12 text-mint-300 ring-mint-400/25',
+    },
+    {
+        icon: Music2,
+        title: 'In-session music',
+        description:
+            'Paste a YouTube, SoundCloud or direct audio link into the floating music player. It plays right in the room — nothing opens in another tab.',
+        tone: 'bg-focus-500/12 text-focus-300 ring-focus-400/25',
     },
 ];
 
