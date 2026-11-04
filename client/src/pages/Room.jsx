@@ -366,7 +366,7 @@ const Room = () => {
                 </div>
 
                 {/* Floating Widgets Wrapper */}
-                <div className="relative w-full md:w-auto z-40 mt-8 mb-4 px-4 flex flex-col sm:flex-row items-center justify-center sm:justify-between gap-4 md:fixed md:bottom-8 md:inset-x-0 md:px-8 md:mt-0 md:mb-0 md:px-0 pointer-events-none">
+                <div className={`relative w-full md:w-auto z-40 mt-8 mb-4 px-4 flex flex-col sm:flex-row items-center justify-center gap-4 md:fixed md:bottom-8 md:inset-x-0 md:px-8 md:mt-0 md:mb-0 md:px-0 pointer-events-none ${isSolo ? 'sm:justify-end' : 'sm:justify-between'}`}>
                     {!isSolo && (
                         <div className="pointer-events-auto w-full sm:w-auto flex justify-center sm:justify-start">
                             <ChatBox roomId={roomId} initialMessages={initialMessages} username={username} />
