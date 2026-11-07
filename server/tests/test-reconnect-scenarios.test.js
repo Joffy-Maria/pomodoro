@@ -1,8 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import EventEmitter from 'events';
-import RoomManager from './src/RoomManager.js';
-import { onPayload } from './src/socketUtils.js';
+import RoomManager from '../src/RoomManager.js';
+import { onPayload } from '../src/socketUtils.js';
 
 class MockSocket extends EventEmitter {
   constructor(id = 'mock-socket-1') {

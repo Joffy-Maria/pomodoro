@@ -45,8 +45,20 @@ RoomManager.onTimerComplete = ({ roomId, completedMode, duration, completionId, 
 io.on('connection', (socket) => {
     console.log(`User connected: ${socket.id}`);
 
+    // Helper to leave any room the socket is currently part of (enforces single-room invariant)
+    const leaveUserFromRooms = (targetSocket, exceptRoomId = null) => {
+        for (const [roomId, room] of RoomManager.rooms.entries()) {
+            if (roomId !== exceptRoomId && room.participants.includes(targetSocket.id)) {
+                targetSocket.leave(roomId);
+                RoomManager.leaveRoom(roomId, targetSocket.id);
+                io.to(roomId).emit('participant_left', { socketId: targetSocket.id });
+            }
+        }
+    };
+
     // Create a new room. Solo rooms skip chat entirely.
     onPayload(socket, 'create_room', { isSolo: { type: 'boolean', required: false } }, (payload, callback) => {
+        leaveUserFromRooms(socket);
         const roomId = RoomManager.createRoom(socket.id, { isSolo: Boolean(payload.isSolo) });
         socket.join(roomId);
         callback({ success: true, roomId, roomState: RoomManager.getRoom(roomId) });
@@ -76,11 +88,16 @@ io.on('connection', (socket) => {
             // Make the approved user join the socket room
             const targetSocket = io.sockets.sockets.get(targetSocketId);
             if (targetSocket) {
+                leaveUserFromRooms(targetSocket, roomId);
+                RoomManager.joinRoom(roomId, targetSocketId);
+                RoomManager.removeJoinRequest(roomId, targetSocketId);
                 targetSocket.join(roomId);
                 io.to(targetSocketId).emit('join_approved', { roomId, roomState: room });
 
                 // Broadcast new participant
                 socket.to(roomId).emit('participant_joined', { socketId: targetSocketId });
+            } else {
+                RoomManager.removeJoinRequest(roomId, targetSocketId);
             }
 
             callback({ success: true });
@@ -103,6 +120,7 @@ io.on('connection', (socket) => {
 
     // Directly join room using link (no approval for demo simplicity, or we can enforce)
     onPayload(socket, 'join_room_direct', { roomId: 'string' }, ({ roomId }, callback) => {
+        leaveUserFromRooms(socket, roomId);
         const success = RoomManager.joinRoom(roomId, socket.id);
         if (success) {
             socket.join(roomId);
@@ -154,13 +172,7 @@ io.on('connection', (socket) => {
 
     socket.on('disconnect', () => {
         console.log(`User disconnected: ${socket.id}`);
-        // Clean up rooms the user was in
-        for (const [roomId, room] of RoomManager.rooms.entries()) {
-            if (room.participants.includes(socket.id)) {
-                RoomManager.leaveRoom(roomId, socket.id);
-                io.to(roomId).emit('participant_left', { socketId: socket.id });
-            }
-        }
+        leaveUserFromRooms(socket);
     });
 
     onPayload(socket, 'timer_pause', { roomId: 'string' }, ({ roomId }, callback) => {

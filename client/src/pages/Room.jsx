@@ -21,6 +21,27 @@ const THEMES = {
     LighthouseOcean: 'https://codepen.io/agathaco/embed/JaGQPr?default-tab=result&theme-id=dark'
 };
 
+// Module-scoped timer map to debounce leave_room and safely ignore React StrictMode synthetic unmount/remount
+const pendingLeaves = new Map();
+
+const cancelPendingLeave = (roomId) => {
+    if (pendingLeaves.has(roomId)) {
+        clearTimeout(pendingLeaves.get(roomId));
+        pendingLeaves.delete(roomId);
+    }
+};
+
+const scheduleLeave = (socket, roomId, delayMs = 150) => {
+    cancelPendingLeave(roomId);
+    const timeoutId = setTimeout(() => {
+        pendingLeaves.delete(roomId);
+        if (socket && socket.connected) {
+            socket.emit('leave_room', { roomId });
+        }
+    }, delayMs);
+    pendingLeaves.set(roomId, timeoutId);
+};
+
 const Room = () => {
     const { roomId } = useParams();
     const navigate = useNavigate();
@@ -70,6 +91,25 @@ const Room = () => {
 
         return () => clearInterval(interval);
     }, [timerState]);
+
+    // Room lifecycle unmount cleanup (handles leaving room when navigating away in SPA or pagehide)
+    useEffect(() => {
+        cancelPendingLeave(roomId);
+
+        const handlePageHide = () => {
+            cancelPendingLeave(roomId);
+            if (socket && socket.connected) {
+                socket.emit('leave_room', { roomId });
+            }
+        };
+
+        window.addEventListener('pagehide', handlePageHide);
+
+        return () => {
+            window.removeEventListener('pagehide', handlePageHide);
+            scheduleLeave(socket, roomId);
+        };
+    }, [roomId, socket]);
 
     // Socket Events
     useEffect(() => {
@@ -130,11 +170,33 @@ const Room = () => {
         const handleTasksSync = (updatedTasks) => {
             if (isMounted) setTasks(updatedTasks);
         };
+        const handleParticipantJoined = ({ socketId }) => {
+            if (isMounted) {
+                setRoomState(prev => {
+                    if (!prev) return prev;
+                    if (prev.participants.includes(socketId)) return prev;
+                    return { ...prev, participants: [...prev.participants, socketId] };
+                });
+            }
+        };
+        const handleParticipantLeft = ({ socketId }) => {
+            if (isMounted) {
+                setRoomState(prev => {
+                    if (!prev) return prev;
+                    return {
+                        ...prev,
+                        participants: prev.participants.filter(id => id !== socketId)
+                    };
+                });
+            }
+        };
 
         socket.on('timer_sync', handleTimerSync);
         socket.on('timer_complete', handleTimerComplete);
         socket.on('background_changed', handleBackgroundChanged);
         socket.on('tasks_sync', handleTasksSync);
+        socket.on('participant_joined', handleParticipantJoined);
+        socket.on('participant_left', handleParticipantLeft);
 
         return () => {
             isMounted = false;
@@ -142,6 +204,8 @@ const Room = () => {
             socket.off('timer_complete', handleTimerComplete);
             socket.off('background_changed', handleBackgroundChanged);
             socket.off('tasks_sync', handleTasksSync);
+            socket.off('participant_joined', handleParticipantJoined);
+            socket.off('participant_left', handleParticipantLeft);
         };
     }, [roomId, socket, isConnected, navigate]);
 
