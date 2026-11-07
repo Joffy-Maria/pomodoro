@@ -1,4 +1,4 @@
-import RoomManager from './src/RoomManager.js';
+import RoomManager from '../src/RoomManager.js';
 
 let passed = 0;
 let failed = 0;

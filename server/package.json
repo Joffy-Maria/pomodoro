@@ -7,7 +7,7 @@
   "scripts": {
     "start": "node src/index.js",
     "dev": "node src/index.js",
-    "test": "node test-on-payload.js && node test-timer-lifecycle.js"
+    "test": "node tests/test-on-payload.js && node tests/test-timer-lifecycle.js"
   },
   "keywords": [],
   "author": "",
