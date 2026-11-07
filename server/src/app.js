@@ -30,6 +30,18 @@ const io = new Server(httpServer, {
     }
 });
 
+// Broadcast timer completion and synced state when room timer expires on the server
+RoomManager.onTimerComplete = ({ roomId, completedMode, duration, completionId, nextMode, timer }) => {
+    io.to(roomId).emit('timer_complete', {
+        roomId,
+        mode: completedMode,
+        duration,
+        completionId,
+        nextMode
+    });
+    io.to(roomId).emit('timer_sync', timer);
+};
+
 io.on('connection', (socket) => {
     console.log(`User connected: ${socket.id}`);
 

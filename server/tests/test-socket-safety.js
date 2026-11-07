@@ -1,5 +1,5 @@
 import { io as Client } from 'socket.io-client';
-import { httpServer } from './src/app.js';
+import { httpServer } from '../src/app.js';
 
 async function runTests() {
   const server = httpServer.listen(0);

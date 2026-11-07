@@ -41,7 +41,7 @@ const Room = () => {
     const [showUsernameModal, setShowUsernameModal] = useState(false);
 
     // Guards against recording the same finished block twice.
-    const recordedEndRef = useRef(null);
+    const processedCompletionsRef = useRef(new Set());
 
     const updateDisplay = (seconds) => {
         const m = Math.floor(seconds / 60).toString().padStart(2, '0');
@@ -62,15 +62,6 @@ const Room = () => {
 
                 if (remainingRaw <= 0) {
                     clearInterval(interval);
-
-                    // Track completed focus blocks once per timer run (local only).
-                    if (timerState.mode === 'focus' && recordedEndRef.current !== timerState.endTime) {
-                        recordedEndRef.current = timerState.endTime;
-                        recordFocusComplete({
-                            roomId,
-                            minutes: Math.round((timerState.duration || 1500) / 60),
-                        });
-                    }
                 }
             }, 500);
         } else {
@@ -78,7 +69,7 @@ const Room = () => {
         }
 
         return () => clearInterval(interval);
-    }, [timerState, roomId]);
+    }, [timerState]);
 
     // Socket Events
     useEffect(() => {
@@ -122,6 +113,15 @@ const Room = () => {
         const handleTimerSync = (newTimer) => {
             if (isMounted) setTimerState(newTimer);
         };
+        const handleTimerComplete = ({ mode, duration, completionId }) => {
+            if (mode === 'focus' && completionId && !processedCompletionsRef.current.has(completionId)) {
+                processedCompletionsRef.current.add(completionId);
+                recordFocusComplete({
+                    roomId,
+                    minutes: Math.round((duration || 1500) / 60),
+                });
+            }
+        };
         const handleBackgroundChanged = (bg) => {
             if (isMounted) {
                 setRoomState(prev => prev ? { ...prev, settings: { ...prev.settings, background: bg } } : null);
@@ -132,12 +132,14 @@ const Room = () => {
         };
 
         socket.on('timer_sync', handleTimerSync);
+        socket.on('timer_complete', handleTimerComplete);
         socket.on('background_changed', handleBackgroundChanged);
         socket.on('tasks_sync', handleTasksSync);
 
         return () => {
             isMounted = false;
             socket.off('timer_sync', handleTimerSync);
+            socket.off('timer_complete', handleTimerComplete);
             socket.off('background_changed', handleBackgroundChanged);
             socket.off('tasks_sync', handleTasksSync);
         };

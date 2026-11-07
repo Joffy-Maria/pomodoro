@@ -1,5 +1,5 @@
 import EventEmitter from 'events';
-import { onPayload } from './src/socketUtils.js';
+import { onPayload } from '../src/socketUtils.js';
 
 class MockSocket extends EventEmitter {
   constructor() {

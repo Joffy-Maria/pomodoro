@@ -8,6 +8,7 @@
     "start": "node src/index.js",
     "dev": "node src/index.js",
     "test": "node test-on-payload.js && node --test test-reconnect-scenarios.test.js"
+    "test": "node tests/test-on-payload.js && node tests/test-timer-lifecycle.js"
   },
   "keywords": [],
   "author": "",
