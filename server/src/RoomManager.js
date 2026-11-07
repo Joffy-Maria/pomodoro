@@ -7,6 +7,10 @@ class RoomManager {
 
   createRoom(hostSocketId, { isSolo = false } = {}) {
     const roomId = Math.random().toString(36).substring(2, 8).toUpperCase();
+    if (this.cleanupTimers && this.cleanupTimers.has(roomId)) {
+      clearTimeout(this.cleanupTimers.get(roomId));
+      this.cleanupTimers.delete(roomId);
+    }
     this.rooms.set(roomId, {
       id: roomId,
       host: hostSocketId,
@@ -72,7 +76,12 @@ class RoomManager {
       this.cleanupTimers.set(
         roomId,
         setTimeout(() => {
-          this.deleteRoom(roomId);
+          const currentRoom = this.rooms.get(roomId);
+          if (currentRoom === room && currentRoom.participants.length === 0) {
+            this.deleteRoom(roomId);
+          } else {
+            this.cleanupTimers.delete(roomId);
+          }
         }, 60000)
       );
     } else if (room.host === socketId) {
