@@ -2,6 +2,7 @@ class RoomManager {
   constructor() {
     // rooms key: roomId, value: roomData
     this.rooms = new Map();
+    this.cleanupTimers = new Map();
   }
 
   createRoom(hostSocketId, { isSolo = false } = {}) {
@@ -36,14 +37,25 @@ class RoomManager {
   }
 
   deleteRoom(roomId) {
+    if (this.cleanupTimers && this.cleanupTimers.has(roomId)) {
+      clearTimeout(this.cleanupTimers.get(roomId));
+      this.cleanupTimers.delete(roomId);
+    }
     this.rooms.delete(roomId);
   }
 
   joinRoom(roomId, socketId) {
     const room = this.rooms.get(roomId);
     if (!room) return false;
+    if (this.cleanupTimers && this.cleanupTimers.has(roomId)) {
+      clearTimeout(this.cleanupTimers.get(roomId));
+      this.cleanupTimers.delete(roomId);
+    }
     if (!room.participants.includes(socketId)) {
       room.participants.push(socketId);
+    }
+    if (!room.host || !room.participants.includes(room.host)) {
+      room.host = room.participants[0];
     }
     return true;
   }
@@ -53,7 +65,16 @@ class RoomManager {
     if (!room) return;
     room.participants = room.participants.filter(id => id !== socketId);
     if (room.participants.length === 0) {
-      this.deleteRoom(roomId);
+      if (!this.cleanupTimers) this.cleanupTimers = new Map();
+      if (this.cleanupTimers.has(roomId)) {
+        clearTimeout(this.cleanupTimers.get(roomId));
+      }
+      this.cleanupTimers.set(
+        roomId,
+        setTimeout(() => {
+          this.deleteRoom(roomId);
+        }, 60000)
+      );
     } else if (room.host === socketId) {
       // Reassign host if host leaves
       room.host = room.participants[0];
