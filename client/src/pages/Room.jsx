@@ -74,26 +74,27 @@ const Room = () => {
     // Socket Events
     useEffect(() => {
         if (!socket || !isConnected) {
-            // Wait for reconnect or redirect to home if totally failed after timeout
-            const t = setTimeout(() => {
-                if (!isConnected) navigate('/home');
-            }, 3000);
-            return () => clearTimeout(t);
+            return undefined;
         }
 
+        let isMounted = true;
+
         socket.emit('check_room', { roomId }, (response) => {
-            if (response.success) {
+            if (!isMounted) return;
+
+            if (response && response.success) {
                 // Check if already in participants list 
-                // If not, it means this was a shared link, so join directly
+                // If not, it means this was a shared link or reconnected socket, so join directly
                 if (!response.roomState.participants.includes(socket.id)) {
                     socket.emit('join_room_direct', { roomId }, (joinResponse) => {
-                        if (joinResponse.success) {
+                        if (!isMounted) return;
+                        if (joinResponse && joinResponse.success) {
                             setRoomState(joinResponse.roomState);
                             setTimerState(joinResponse.roomState.timer);
                             setTasks(joinResponse.roomState.tasks || []);
                             setInitialMessages(joinResponse.roomState.chat || []);
-                        } else {
-                            navigate('/home');
+                        } else if (joinResponse && joinResponse.success === false) {
+                            navigate('/dashboard');
                         }
                     });
                 } else {
@@ -103,14 +104,14 @@ const Room = () => {
                     setTasks(response.roomState.tasks || []);
                     setInitialMessages(response.roomState.chat || []);
                 }
-            } else {
-                navigate('/home'); // Room doesn't exist
+            } else if (response && response.success === false) {
+                navigate('/dashboard'); // Room doesn't exist
             }
         });
 
         // Listeners
         const handleTimerSync = (newTimer) => {
-            setTimerState(newTimer);
+            if (isMounted) setTimerState(newTimer);
         };
         const handleTimerComplete = ({ mode, duration, completionId }) => {
             if (mode === 'focus' && completionId && !processedCompletionsRef.current.has(completionId)) {
@@ -122,10 +123,12 @@ const Room = () => {
             }
         };
         const handleBackgroundChanged = (bg) => {
-            setRoomState(prev => prev ? { ...prev, settings: { ...prev.settings, background: bg } } : null);
+            if (isMounted) {
+                setRoomState(prev => prev ? { ...prev, settings: { ...prev.settings, background: bg } } : null);
+            }
         };
         const handleTasksSync = (updatedTasks) => {
-            setTasks(updatedTasks);
+            if (isMounted) setTasks(updatedTasks);
         };
 
         socket.on('timer_sync', handleTimerSync);
@@ -134,6 +137,7 @@ const Room = () => {
         socket.on('tasks_sync', handleTasksSync);
 
         return () => {
+            isMounted = false;
             socket.off('timer_sync', handleTimerSync);
             socket.off('timer_complete', handleTimerComplete);
             socket.off('background_changed', handleBackgroundChanged);
@@ -143,17 +147,17 @@ const Room = () => {
 
     // Actions
     const handleCommand = (command) => {
-        if (!socket) return;
+        if (!socket || !isConnected) return;
         socket.emit(`timer_${command}`, { roomId });
     };
 
     const handleSwitchMode = (mode) => {
-        if (!socket) return;
+        if (!socket || !isConnected) return;
         socket.emit('timer_switch_mode', { roomId, mode });
     };
 
     const handleChangeBg = (bgName) => {
-        if (!socket) return;
+        if (!socket || !isConnected) return;
         setCustomGif(null); // Clear custom gif when switching to 3D
         socket.emit('change_background', { roomId, background: bgName });
         setBgSelectionOpen(false);
@@ -188,8 +192,14 @@ const Room = () => {
             <div className="flex min-h-screen flex-col items-center justify-center gap-5 bg-ink-950 px-6 text-center">
                 <div className="h-10 w-10 animate-spin rounded-full border-2 border-white/10 border-t-brand-400" />
                 <div>
-                    <p className="font-display text-lg font-semibold text-white">Syncing your session</p>
-                    <p className="mt-1 text-sm text-slate-500">Setting up your focus space…</p>
+                    <p className="font-display text-lg font-semibold text-white">
+                        {!isConnected ? 'Connecting...' : 'Syncing your session'}
+                    </p>
+                    <p className="mt-1 text-sm text-slate-500">
+                        {!isConnected
+                            ? 'Waking up the server, this may take a few moments…'
+                            : 'Setting up your focus space…'}
+                    </p>
                 </div>
                 <Link to="/dashboard" className="btn btn-ghost py-2 text-xs">
                     Back to dashboard
@@ -223,6 +233,24 @@ const Room = () => {
     return (
         <PageTransition transitionType="morph">
             <div className={`relative min-h-[100dvh] w-full overflow-x-hidden overflow-y-auto bg-black text-white flex flex-col pt-24 pb-32 md:py-0 md:block ${isLightTheme ? 'theme-light' : 'theme-dark'}`}>
+
+                {/* Reconnecting Overlay / Indicator */}
+                <AnimatePresence>
+                    {!isConnected && (
+                        <motion.div
+                            initial={{ opacity: 0, y: -20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -20 }}
+                            className="fixed top-6 left-1/2 -translate-x-1/2 z-[150] flex items-center gap-3 px-5 py-2.5 rounded-2xl bg-[#09090b]/95 border border-focus-500/50 text-white shadow-[0_0_30px_rgba(255,107,94,0.3)] backdrop-blur-xl pointer-events-auto"
+                        >
+                            <div className="h-3 w-3 animate-spin rounded-full border-2 border-focus-400 border-t-transparent" />
+                            <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2">
+                                <span className="text-sm font-bold tracking-wide text-focus-300">Reconnecting...</span>
+                                <span className="text-xs text-white/60">Connection lost, attempting to restore…</span>
+                            </div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
 
                 {/* Background rendering (Custom string URL, local upload, or iFrame) */}
                 <div className="absolute inset-0 z-0 overflow-hidden bg-black">
@@ -266,6 +294,12 @@ const Room = () => {
                                 <button onClick={copyLink} className={`p-1.5 md:p-2 rounded-lg transition-colors ${isLightTheme ? 'hover:bg-black/10 text-black/70 hover:text-black' : 'hover:bg-white/10 text-white/70 hover:text-white'}`}>
                                     {copied ? <Check size={14} className="text-mint-400" /> : <Copy size={14} className="md:w-4 md:h-4" />}
                                 </button>
+                                {!isConnected && (
+                                    <span className="inline-flex items-center gap-1.5 rounded-full border border-focus-500/30 bg-focus-500/10 px-2.5 py-0.5 text-xs font-medium text-focus-300">
+                                        <span className="h-1.5 w-1.5 rounded-full bg-focus-400 animate-pulse" />
+                                        Reconnecting...
+                                    </span>
+                                )}
                             </div>
                         </div>
                     </div>
@@ -360,10 +394,17 @@ const Room = () => {
                     </div>
 
                     {/* Participants count indicator */}
-                    <div className="mt-8 px-6 py-2 glass-panel rounded-full text-sm text-white/50 tracking-widest font-medium mx-auto">
-                        {isSolo
-                            ? 'Solo focus session'
-                            : `${roomState.participants?.length || 1} Syncing Participant(s)`}
+                    <div className="mt-8 px-6 py-2 glass-panel rounded-full text-sm text-white/50 tracking-widest font-medium mx-auto flex items-center gap-2">
+                        {!isConnected ? (
+                            <>
+                                <span className="h-2 w-2 rounded-full bg-focus-400 animate-pulse" />
+                                <span className="text-focus-300">Reconnecting...</span>
+                            </>
+                        ) : isSolo ? (
+                            'Solo focus session'
+                        ) : (
+                            `${roomState.participants?.length || 1} Syncing Participant(s)`
+                        )}
                     </div>
                 </div>
 

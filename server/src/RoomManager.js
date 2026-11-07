@@ -2,12 +2,17 @@ class RoomManager {
   constructor() {
     // rooms key: roomId, value: roomData
     this.rooms = new Map();
+    this.cleanupTimers = new Map();
     this.timerTimeouts = new Map(); // roomId -> timeoutId
     this.onTimerComplete = null; // optional callback: ({ roomId, completedMode, duration, completionId, nextMode, timer }) => void
   }
 
   createRoom(hostSocketId, { isSolo = false } = {}) {
     const roomId = Math.random().toString(36).substring(2, 8).toUpperCase();
+    if (this.cleanupTimers && this.cleanupTimers.has(roomId)) {
+      clearTimeout(this.cleanupTimers.get(roomId));
+      this.cleanupTimers.delete(roomId);
+    }
     this.rooms.set(roomId, {
       id: roomId,
       host: hostSocketId,
@@ -38,6 +43,10 @@ class RoomManager {
   }
 
   deleteRoom(roomId) {
+    if (this.cleanupTimers && this.cleanupTimers.has(roomId)) {
+      clearTimeout(this.cleanupTimers.get(roomId));
+      this.cleanupTimers.delete(roomId);
+    }
     this.clearRoomTimeout(roomId);
     this.rooms.delete(roomId);
   }
@@ -52,8 +61,15 @@ class RoomManager {
   joinRoom(roomId, socketId) {
     const room = this.rooms.get(roomId);
     if (!room) return false;
+    if (this.cleanupTimers && this.cleanupTimers.has(roomId)) {
+      clearTimeout(this.cleanupTimers.get(roomId));
+      this.cleanupTimers.delete(roomId);
+    }
     if (!room.participants.includes(socketId)) {
       room.participants.push(socketId);
+    }
+    if (!room.host || !room.participants.includes(room.host)) {
+      room.host = room.participants[0];
     }
     return true;
   }
@@ -63,7 +79,21 @@ class RoomManager {
     if (!room) return;
     room.participants = room.participants.filter(id => id !== socketId);
     if (room.participants.length === 0) {
-      this.deleteRoom(roomId);
+      if (!this.cleanupTimers) this.cleanupTimers = new Map();
+      if (this.cleanupTimers.has(roomId)) {
+        clearTimeout(this.cleanupTimers.get(roomId));
+      }
+      this.cleanupTimers.set(
+        roomId,
+        setTimeout(() => {
+          const currentRoom = this.rooms.get(roomId);
+          if (currentRoom === room && currentRoom.participants.length === 0) {
+            this.deleteRoom(roomId);
+          } else {
+            this.cleanupTimers.delete(roomId);
+          }
+        }, 60000)
+      );
     } else if (room.host === socketId) {
       // Reassign host if host leaves
       room.host = room.participants[0];
