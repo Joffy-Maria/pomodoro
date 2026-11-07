@@ -2,6 +2,8 @@ class RoomManager {
   constructor() {
     // rooms key: roomId, value: roomData
     this.rooms = new Map();
+    this.timerTimeouts = new Map(); // roomId -> timeoutId
+    this.onTimerComplete = null; // optional callback: ({ roomId, completedMode, duration, completionId, nextMode, timer }) => void
   }
 
   createRoom(hostSocketId, { isSolo = false } = {}) {
@@ -36,7 +38,15 @@ class RoomManager {
   }
 
   deleteRoom(roomId) {
+    this.clearRoomTimeout(roomId);
     this.rooms.delete(roomId);
+  }
+
+  clearRoomTimeout(roomId) {
+    if (this.timerTimeouts.has(roomId)) {
+      clearTimeout(this.timerTimeouts.get(roomId));
+      this.timerTimeouts.delete(roomId);
+    }
   }
 
   joinRoom(roomId, socketId) {
@@ -74,23 +84,75 @@ class RoomManager {
   }
 
   // Timer controls
-  startTimer(roomId) {
+  startTimer(roomId, onComplete) {
     const room = this.rooms.get(roomId);
     if (!room) return false;
 
     if (room.timer.status !== 'running') {
+      // Ensure positive remaining seconds before running to prevent 00:00 lock
+      if (room.timer.timeRemaining <= 0) {
+        room.timer.timeRemaining = room.timer.mode === 'focus' ? room.settings.focusDuration : room.settings.breakDuration;
+        room.timer.duration = room.timer.timeRemaining;
+      }
+
       room.timer.status = 'running';
-      room.timer.startTime = Date.now();
-      room.timer.endTime = Date.now() + (room.timer.timeRemaining * 1000);
+      const now = Date.now();
+      room.timer.startTime = now;
+      room.timer.endTime = now + (room.timer.timeRemaining * 1000);
+
+      this.clearRoomTimeout(roomId);
+      const delayMs = Math.max(0, room.timer.timeRemaining * 1000);
+      const timeoutId = setTimeout(() => {
+        this.timerTimeouts.delete(roomId);
+        this.handleTimerCompletion(roomId, onComplete);
+      }, delayMs);
+
+      this.timerTimeouts.set(roomId, timeoutId);
+
       return true;
     }
     return false;
+  }
+
+  handleTimerCompletion(roomId, onComplete) {
+    const room = this.rooms.get(roomId);
+    if (!room || room.timer.status !== 'running') return;
+
+    const completedMode = room.timer.mode;
+    const completedDuration = room.timer.duration;
+    const completionId = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+
+    // Transition mode: focus -> break, break -> focus
+    const nextMode = completedMode === 'focus' ? 'break' : 'focus';
+    room.timer.mode = nextMode;
+    room.timer.status = 'stopped';
+    const nextDuration = nextMode === 'focus' ? room.settings.focusDuration : room.settings.breakDuration;
+    room.timer.duration = nextDuration;
+    room.timer.timeRemaining = nextDuration;
+    room.timer.startTime = null;
+    room.timer.endTime = null;
+
+    const completionData = {
+      roomId,
+      completedMode,
+      duration: completedDuration,
+      completionId,
+      nextMode,
+      timer: room.timer
+    };
+
+    if (typeof onComplete === 'function') {
+      onComplete(completionData);
+    } else if (typeof this.onTimerComplete === 'function') {
+      this.onTimerComplete(completionData);
+    }
   }
 
   pauseTimer(roomId) {
     const room = this.rooms.get(roomId);
     if (!room || room.timer.status !== 'running') return false;
 
+    this.clearRoomTimeout(roomId);
     const now = Date.now();
     room.timer.status = 'paused';
     room.timer.timeRemaining = Math.max(0, Math.floor((room.timer.endTime - now) / 1000));
@@ -103,6 +165,7 @@ class RoomManager {
     const room = this.rooms.get(roomId);
     if (!room) return false;
 
+    this.clearRoomTimeout(roomId);
     room.timer.status = 'stopped';
     room.timer.timeRemaining = room.timer.mode === 'focus' ? room.settings.focusDuration : room.settings.breakDuration;
     room.timer.duration = room.timer.timeRemaining;
@@ -115,6 +178,7 @@ class RoomManager {
     const room = this.rooms.get(roomId);
     if (!room) return false;
 
+    this.clearRoomTimeout(roomId);
     room.timer.mode = mode; // 'focus' or 'break'
     this.resetTimer(roomId);
     return true;
